@@ -12,7 +12,18 @@ router.get('/', async (req,res) => {
         res.json(sessions)
     } catch (err) {
         console.log(err)
-        res.status(500).json({message: "test error message"})
+        res.status(500).json({message: err})
+    }
+})
+
+// GET: specific session 
+router.get('/:sessionID', async (req,res) => {
+    try {
+        const session = await Session.find()
+        res.json(session)
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({message: err})
     }
 })
 
