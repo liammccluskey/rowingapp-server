@@ -19,7 +19,7 @@ router.get('/', async (req,res) => {
 // GET: specific session 
 router.get('/:sessionID', async (req,res) => {
     try {
-        const session = await Session.find()
+        const session = await Session.findById(req.params.sessionID)
         res.json(session)
     } catch (err) {
         console.log(err)
