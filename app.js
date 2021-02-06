@@ -1,3 +1,8 @@
+// push changes to heroku
+// git add .
+// git commit -am "some message"
+// git push heroku master
+
 const express = require('express')
 const app = express()
 const cors = require('cors')
@@ -11,6 +16,12 @@ app.use(express.json())
 // Routes
 const sessionsRoute = require('./routes/sessions')
 app.use('/sessions', sessionsRoute)
+
+const usersRoute = require('./routes/users')
+app.use('/users', usersRoute)
+
+const clubsRoute = require('./routes/clubs')
+app.use('/clubs', clubsRoute)
 
 mongoose.connect(process.env.DB_CONNECTION ,{ 
     useNewUrlParser: true, 
