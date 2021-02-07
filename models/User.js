@@ -13,6 +13,6 @@ const UserSchema = mongoose.Schema({
         type: [String],
         default: []
     }
-}, {timestamps: {createdAt: 'created_at'})
+}, {timestamps: {createdAt: 'created_at'}})
 
 module.exports = mongoose.model('User', UserSchema)
