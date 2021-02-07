@@ -19,10 +19,6 @@ const ClubSchema = mongoose.Schema({
         required: true,
         unique: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
-}, {timestamps: {createdAt: 'created_at'}} )
+}, {timestamps: true} )
 
 module.exports = mongoose.model('Club', ClubSchema)
