@@ -5,10 +5,33 @@ const Club = require('../models/Club')
 
 // PATH: /clubs
 
-// GET: get a club
-router.post('/:clubID', async (req, res) => {
+// GET: search for clubs with query
+router.get('/search', async (req, res) => {
     try {
-        const club = Club.findById(req.params.clubID)
+        const clubs = await Club.find()
+        res.json(clubs)
+    } catch {error} {
+        console.log("err occured when searching for club")
+        res.status(500).json({message: error})
+    }
+})
+
+// GET: search for one club with query 
+router.get('/search-one', async (req, res) => {
+    console.log(req.query)
+    try {
+        const club = await Club.findOne(req.query)
+        res.json(club)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({message: error})
+    }
+})
+
+// GET: get a specific club by ID
+router.get('/:clubID', async (req, res) => {
+    try {
+        const club = await Club.findById(req.params.clubID)
         res.json(club)
     } catch (error) {
         console.log(error)
@@ -26,9 +49,13 @@ router.post('/', async (req, res) => {
     })
     try {
         const savedClub = await club.save()
-        res.json(savedPost)
+        res.json(savedClub)
     } catch (error) {
         res.json({message: error})
         console.log(error)
     }
 })
+
+
+
+ module.exports = router

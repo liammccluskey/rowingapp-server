@@ -8,11 +8,11 @@ const UserSchema = mongoose.Schema({
     firebaseUID: {
         type: String,
         required: true,
-    }
+    },
     clubIDs: {
         type: [String],
         default: []
-    },
+    }
 })
 
 module.exports = mongoose.model('User', UserSchema)
