@@ -1,16 +1,19 @@
 const express = require('express')
 const router = express.Router()
 const Club = require('../models/Club')
+const User = require('../models/User')
 
 
 // PATH: /clubs
 
 // GET: search for clubs with query
 router.get('/search', async (req, res) => {
+    console.log(req.query)
     try {
-        const clubs = await Club.find()
+        const clubs = await Club.find(req.query)
         res.json(clubs)
-    } catch {error} {
+    } catch (error) {
+        console.log('\n\n' + error + '\n\n')
         console.log("err occured when searching for club")
         res.status(500).json({message: error})
     }
@@ -49,10 +52,31 @@ router.post('/', async (req, res) => {
     })
     try {
         const savedClub = await club.save()
+        await User.findByIdAndUpdate(req.body.uid,
+            {$addToSet: {clubIDs: savedClub._id}}
+        )
+        console.log('did create an join club')
         res.json(savedClub)
     } catch (error) {
         res.json({message: error})
         console.log(error)
+    }
+})
+
+router.post('/:clubID/join', async (req,res) => {
+    console.log()
+    try {
+        const updatedClub = await Club.findByIdAndUpdate(req.params.clubID, 
+            {$addToSet: {memberUIDs: req.body.uid}}
+        )
+        await User.findByIdAndUpdate(req.body.uid,
+            {$addToSet: {clubIDs: req.params.clubID}}
+        )
+        console.log('did join club')
+        res.json(updatedClub)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({message: error})
     }
 })
 
