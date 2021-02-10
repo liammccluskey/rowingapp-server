@@ -13,8 +13,7 @@ router.get('/search', async (req, res) => {
         const clubs = await Club.find(req.query)
         res.json(clubs)
     } catch (error) {
-        console.log('\n\n' + error + '\n\n')
-        console.log("err occured when searching for club")
+        console.log(error)
         res.status(500).json({message: error})
     }
 })
@@ -48,7 +47,8 @@ router.post('/', async (req, res) => {
         name: req.body.name,
         memberUIDs: [req.body.uid],
         adminUIDs: [req.body.uid],
-        customURL: req.body.customURL
+        customURL: req.body.customURL,
+        description: req.body.description
     })
     try {
         const savedClub = await club.save()

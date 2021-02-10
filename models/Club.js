@@ -19,6 +19,10 @@ const ClubSchema = mongoose.Schema({
         required: true,
         unique: true
     },
+    description: {
+        type: String,
+        required: true,
+    }
 }, {timestamps: true} )
 
 module.exports = mongoose.model('Club', ClubSchema)
