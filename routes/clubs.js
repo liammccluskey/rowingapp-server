@@ -48,7 +48,8 @@ router.post('/', async (req, res) => {
         memberUIDs: [req.body.uid],
         adminUIDs: [req.body.uid],
         customURL: req.body.customURL,
-        description: req.body.description
+        description: req.body.description,
+        iconURL: req.body.iconURL
     })
     try {
         const savedClub = await club.save()

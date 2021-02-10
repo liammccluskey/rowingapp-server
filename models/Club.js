@@ -22,6 +22,10 @@ const ClubSchema = mongoose.Schema({
     description: {
         type: String,
         required: true,
+    },
+    iconURL: {
+        type: String,
+        required: true
     }
 }, {timestamps: true} )
 
