@@ -3,8 +3,7 @@ const mongoose = require('mongoose')
 const ClubSchema = mongoose.Schema({
     name: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     adminUIDs: {
         type: [String],
