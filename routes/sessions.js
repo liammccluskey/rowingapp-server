@@ -69,7 +69,7 @@ router.post('/', async (req,res) => {
         hostName: req.body.hostName,
         hostUID: req.body.hostUID,
         startAt: req.body.startAt,
-        canAccessByLink: req.body.canAccessByLink,
+        isAccessibleByLink: req.body.isAccessibleByLink,
         associatedClubID: req.body.associatedClubID
     })
     console.log(req.body)

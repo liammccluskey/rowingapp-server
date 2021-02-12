@@ -20,11 +20,11 @@ const SessionSchema = mongoose.Schema({
         type: Date,
         required: true
     },
-    canAccessByLink: {
+    isAccessibleByLink: {
         type: Boolean,
         required: true
     },
-    forClubID: {
+    associatedClubID: {
         type: String,
         required: true,
         index: true
