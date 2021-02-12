@@ -14,14 +14,12 @@ router.get('/active/:uid', async (req, res) => {
             .select('clubIDs')
 
         const sessions = await Session
-            .find(
-                { $or: [
+            .find({ $or: [
                     {hostUID: uid},
                     {forClubID: { $in: userData.clubIDs } }
-                    ]
-                },
-                { isActive: true }
-            )
+                    ],
+                    isActive: true
+            })
             .sort( { startAt: 1 } )
 
         res.json(sessions)
