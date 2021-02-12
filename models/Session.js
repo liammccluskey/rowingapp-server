@@ -17,7 +17,7 @@ const SessionSchema = mongoose.Schema({
     },
     startAt: {
         type: Date,
-        default: Date.now
+        required: true
     },
     members: {
         type: [ SessionMember.schema ],
