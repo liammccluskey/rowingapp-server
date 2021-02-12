@@ -25,6 +25,7 @@ router.get('/:uid', async (req, res) => {
     }
 })
 
+
 // POST: create a new user
 router.post('/', async (req, res) =>{
     // check if user exists

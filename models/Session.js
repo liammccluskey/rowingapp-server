@@ -13,12 +13,23 @@ const SessionSchema = mongoose.Schema({
     },
     hostUID: {
         type: String,
-        required: true
+        required: true,
+        index: true
     },
     startAt: {
         type: Date,
         required: true
     },
+    canAccessByLink: {
+        type: Boolean,
+        required: true
+    },
+    forClubID: {
+        type: String,
+        required: true,
+        index: true
+    },
+
     members: {
         type: [ SessionMember.schema ],
         default: []

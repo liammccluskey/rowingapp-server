@@ -6,6 +6,23 @@ const User = require('../models/User')
 
 // PATH: /clubs
 
+// GET: clubs a user belongs to
+router.get('/uid/:uid', async (req, res) => {
+    try {
+        const userData = await User
+            .findById(req.params.uid)
+            .select('clubIDs')
+
+        const clubs = await Club
+            .find(
+                { _id: { $in: userData.clubIDs } }
+            )
+        res.json(clubs)
+    } catch(error) {
+        res.status(500).json({message: error})
+    }
+})
+
 // GET: search for clubs with query
 router.get('/search', async (req, res) => {
     console.log(req.query)
@@ -65,7 +82,6 @@ router.post('/', async (req, res) => {
 })
 
 router.post('/:clubID/join', async (req,res) => {
-    console.log()
     try {
         const updatedClub = await Club.findByIdAndUpdate(req.params.clubID, 
             {$addToSet: {memberUIDs: req.body.uid}}
@@ -73,7 +89,6 @@ router.post('/:clubID/join', async (req,res) => {
         await User.findByIdAndUpdate(req.body.uid,
             {$addToSet: {clubIDs: req.params.clubID}}
         )
-        console.log('did join club')
         res.json(updatedClub)
     } catch (error) {
         console.log(error)

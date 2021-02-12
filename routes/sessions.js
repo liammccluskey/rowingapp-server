@@ -5,6 +5,41 @@ const SessionMember = require('../models/SessionMember')
 
 // PATH: /sessions
 
+
+// GET: Active sessions hosted by uid, or where [uid in associatedClub.memberIDs]
+router.get('/active/:uid', async (req, res) => {
+    try {
+        const userData = await User
+            .findById(req.params.uid)
+            .select('clubIDs')
+
+        const sessions = await Session
+            .find({
+                $or: [
+                    {hostUID: uid},
+                    {forClubID: { $in: userData.clubIDs } }
+                ]
+            })
+            .sort( { startAt: 1 } )
+
+        res.json(sessions)
+    } catch(error) {
+        console.log(error)
+        res.status(500).json({message: error})
+    }
+    
+})
+
+// GET: all active sessions for a user
+router.get('/search', async (req, res) => {
+    try {
+
+    } catch(error) {
+        console.log(error)
+        res.status(500).json({message: error})
+    }
+})
+
 // GET: all sessions
 router.get('/', async (req,res) => {
     try {
@@ -33,15 +68,17 @@ router.post('/', async (req,res) => {
         title: req.body.title,
         hostName: req.body.hostName,
         hostUID: req.body.hostUID,
-        startAt: req.body.startAt
+        startAt: req.body.startAt,
+        canAccessByLink: req.body.canAccessByLink,
+        associatedClubID: req.body.associatedClubID
     })
     console.log(req.body)
     try {
-        const savedPost = await session.save()
+        const savedSession = await session.save()
         res.json(session)
     } catch (err) {
         console.log(err)
-        res.status(500).json({message: "test error message"})
+        res.status(500).json({message: err})
     }
 })
 
@@ -51,7 +88,7 @@ router.patch('/:sessionID/join', async (req,res) => {
         name: req.body.name
     })
     try {
-        const joinedSession = await Session.findByIdAndUpdate(req.params.sessionID, 
+        await Session.findByIdAndUpdate(req.params.sessionID, 
             {$push : {members: sessionMember}}
         )
         res.json(sessionMember)
