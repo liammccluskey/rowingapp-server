@@ -8,6 +8,7 @@ const UserSchema = mongoose.Schema({
     firebaseUID: {
         type: String,
         required: true,
+        unique: true,
     },
     clubIDs: {
         type: [String],
