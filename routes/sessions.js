@@ -1,22 +1,23 @@
 const express = require('express')
 const router = express.Router()
 const Session = require('../models/Session')
+const User = require('../models/User')
 const SessionMember = require('../models/SessionMember')
 
 // PATH: /sessions
 
 
 // GET: Active sessions hosted by uid, or where [uid in associatedClub.memberIDs]
-router.get('/active/:uid', async (req, res) => {
+router.get('/active/uid/:uid', async (req, res) => {
     try {
         const userData = await User
             .findById(req.params.uid)
             .select('clubIDs')
-
+            
         const sessions = await Session
             .find({ 
                 $or: [
-                    {hostUID: uid},
+                    {hostUID: req.params.uid},
                     {forClubID: { $in: userData.clubIDs } }
                 ],
                 isActive: true
