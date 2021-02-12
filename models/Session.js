@@ -11,6 +11,10 @@ const SessionSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    hostUID: {
+        type: String,
+        required: true
+    },
     startAt: {
         type: Date,
         default: Date.now

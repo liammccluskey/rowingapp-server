@@ -31,7 +31,9 @@ router.get('/:sessionID', async (req,res) => {
 router.post('/', async (req,res) => {
     const session = new Session({
         title: req.body.title,
-        hostName: req.body.hostName
+        hostName: req.body.hostName,
+        hostUID: req.body.hostUID,
+        startAt: req.body.startAt
     })
     console.log(req.body)
     try {
