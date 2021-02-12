@@ -9,13 +9,13 @@ const User = require('../models/User')
 // GET: clubs a user belongs to
 router.get('/uid/:uid', async (req, res) => {
     try {
-        const userData = await User
+        const user = await User
             .findById(req.params.uid)
             .select('clubIDs')
 
         const clubs = await Club
             .find(
-                { _id: { $in: userData.clubIDs } }
+                { _id: { $in: user.clubIDs } }
             )
         res.json(clubs)
     } catch(error) {
