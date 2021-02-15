@@ -70,10 +70,10 @@ router.post('/', async (req, res) => {
     })
     try {
         const savedClub = await club.save()
-        await User.findByIdAndUpdate(req.body.uid,
-            {$addToSet: {clubIDs: savedClub._id}}
+        await User.findOneAndUpdate(
+            {uid: req.body.uid},
+            {$addToSet: {clubIDs: req.params.clubID}}
         )
-        console.log('did create an join club')
         res.json(savedClub)
     } catch (error) {
         res.json({message: error})
@@ -81,12 +81,13 @@ router.post('/', async (req, res) => {
     }
 })
 
-router.post('/:clubID/join', async (req,res) => {
+router.patch('/:clubID/join', async (req,res) => {
     try {
         const updatedClub = await Club.findByIdAndUpdate(req.params.clubID, 
             {$addToSet: {memberUIDs: req.body.uid}}
         )
-        await User.findByIdAndUpdate(req.body.uid,
+        await User.findOneAndUpdate(
+            {uid: req.body.uid},
             {$addToSet: {clubIDs: req.params.clubID}}
         )
         res.json(updatedClub)
