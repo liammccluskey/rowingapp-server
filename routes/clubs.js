@@ -10,7 +10,7 @@ const User = require('../models/User')
 router.get('/uid/:uid', async (req, res) => {
     try {
         const user = await User
-            .findById(req.params.uid)
+            .findOne({uid: req.params.uid})
             .select('clubIDs')
 
         const clubs = await Club

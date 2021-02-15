@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const SessionMember = require('./SessionMember')
 
-
 const SessionSchema = mongoose.Schema({
     title: {
         type: String,
@@ -29,7 +28,6 @@ const SessionSchema = mongoose.Schema({
         required: true,
         index: true
     },
-
     members: {
         type: [ SessionMember.schema ],
         default: []

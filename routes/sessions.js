@@ -11,7 +11,7 @@ const SessionMember = require('../models/SessionMember')
 router.get('/active/uid/:uid', async (req, res) => {
     try {
         const user = await User
-            .findById(req.params.uid)
+            .findOne({uid: req.params.uid})
             .select('clubIDs')
 
         const sessions = await Session

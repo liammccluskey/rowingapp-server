@@ -5,10 +5,11 @@ const UserSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    firebaseUID: {
+    uid: {
         type: String,
         required: true,
         unique: true,
+        index: true
     },
     clubIDs: {
         type: [String],

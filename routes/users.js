@@ -14,10 +14,13 @@ router.get('/', async (req,res) => {
         res.status(500).json(err)
     }
 })
+
 router.get('/:uid', async (req, res) => {
     console.log(req.params.uid)
     try {
-        const user = await User.findById(req.params.uid)
+        const user = await User.findOne({
+            uid: req.params.uid
+        })
         res.json(user)
     } catch (error) {
         console.log(error)
@@ -31,7 +34,7 @@ router.post('/', async (req, res) =>{
     // check if user exists
     const user = new User({
         displayName: req.body.displayName,
-        firebaseUID: req.body.firebaseUID
+        uid: req.body.firebaseUID
     })
     try {
         const newUser = await user.save()
