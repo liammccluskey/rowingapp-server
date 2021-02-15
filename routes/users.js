@@ -34,7 +34,7 @@ router.post('/', async (req, res) =>{
     // check if user exists
     const user = new User({
         displayName: req.body.displayName,
-        uid: req.body.firebaseUID
+        uid: req.body.uid
     })
     try {
         const newUser = await user.save()
