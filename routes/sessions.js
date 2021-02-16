@@ -62,6 +62,7 @@ router.get('/:sessionID', async (req,res) => {
     USE CASE: full display of session data (all member activity)
 */
 router.get('/:sessionID/activities', async(req, res) => {
+    console.log('did hit route')
     try {
         const session = await Session.findById(req.params.sessionID)
         const activities = await Activity.find({
@@ -69,8 +70,9 @@ router.get('/:sessionID/activities', async(req, res) => {
                 $in: session.activityIDs
             }
         })
-        res.json(activites)
+        res.json(activities)
     } catch (error) {
+        console.log(error)
         res.status(500).json({message: error})
     }
 })
