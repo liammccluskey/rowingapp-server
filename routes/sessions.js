@@ -100,7 +100,7 @@ router.post('/', async (req,res) => {
 // PATCH: join a session
 router.patch('/:sessionID/join', async (req, res) => {
     try {
-        await Club.findByIdAndUpdate(req.params.sessionID, {
+        await Session.findByIdAndUpdate(req.params.sessionID, {
             $addToSet: {
                 memberUIDs: req.body.uid,
                 activityIDs: req.body.activityID

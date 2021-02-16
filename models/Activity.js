@@ -6,7 +6,7 @@ const ActivitySchema = mongoose.Schema({
         required: true,
         index: true
     }, 
-    name: {
+    name: { // user's name
         type: String,
         required: true
     },
