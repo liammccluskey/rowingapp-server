@@ -28,13 +28,17 @@ const SessionSchema = mongoose.Schema({
         required: true,
         index: true
     },
-    members: {
-        type: [ SessionMember.schema ],
+    memberUIDs: {
+        type: [String],
         default: []
     },
-    isActive: {
+    activityIDs: {
+        type: [String],
+        default: []
+    },
+    isCompleted: {
         type: Boolean,
-        default: true
+        default: false
     }
 })
 

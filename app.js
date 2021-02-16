@@ -23,6 +23,9 @@ app.use('/users', usersRoute)
 const clubsRoute = require('./routes/clubs')
 app.use('/clubs', clubsRoute)
 
+const activitesRoute = require('./routes/activities')
+app.use('/activities', activitesRoute)
+
 mongoose.connect(process.env.DB_CONNECTION ,{ 
     useNewUrlParser: true, 
     useUnifiedTopology: true, 

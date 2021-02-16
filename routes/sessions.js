@@ -2,13 +2,13 @@ const express = require('express')
 const router = express.Router()
 const Session = require('../models/Session')
 const User = require('../models/User')
-const SessionMember = require('../models/SessionMember')
+const Activity = require('../models/Activity')
 
 // PATH: /sessions
 
 
 // GET: Active sessions hosted by uid, or where [uid in associatedClub.memberIDs]
-router.get('/active/uid/:uid', async (req, res) => {
+router.get('/incomplete/uid/:uid', async (req, res) => {
     try {
         const user = await User
             .findOne({uid: req.params.uid})
@@ -20,7 +20,7 @@ router.get('/active/uid/:uid', async (req, res) => {
                     {hostUID: req.params.uid},
                     {associatedClubID: { $in: user.clubIDs } }
                 ],
-                isActive: true
+                isCompleted: false
             })
             .sort( { startAt: 1 } )
 
@@ -30,16 +30,6 @@ router.get('/active/uid/:uid', async (req, res) => {
         res.status(500).json({message: error})
     }
     
-})
-
-// GET: all active sessions for a user
-router.get('/search', async (req, res) => {
-    try {
-
-    } catch(error) {
-        console.log(error)
-        res.status(500).json({message: error})
-    }
 })
 
 // GET: all sessions
@@ -54,6 +44,9 @@ router.get('/', async (req,res) => {
 })
 
 // GET: specific session 
+/*
+    USE CASE: shallow display of session (not all info needed)
+*/
 router.get('/:sessionID', async (req,res) => {
     try {
         const session = await Session.findById(req.params.sessionID)
@@ -61,6 +54,24 @@ router.get('/:sessionID', async (req,res) => {
     } catch (err) {
         console.log(err)
         res.status(500).json({message: err})
+    }
+})
+
+// GET: activites data from session
+/*
+    USE CASE: full display of session data (all member activity)
+*/
+router.get('/:sessionID/activities', async(req, res) => {
+    try {
+        const session = await Session.findById(req.params.sessionID)
+        const activities = await Activity.find({
+            _id: {
+                $in: session.activityIDs
+            }
+        })
+        res.json(activites)
+    } catch (error) {
+        res.status(500).json({message: error})
     }
 })
 
@@ -84,32 +95,19 @@ router.post('/', async (req,res) => {
     }
 })
 
-// PATCH: Join a session
-router.patch('/:sessionID/join', async (req,res) => {
-    const sessionMember = new SessionMember({
-        name: req.body.name
-    })
+// PATCH: join a session
+router.patch('/:sessionID/join', async (req, res) => {
     try {
-        await Session.findByIdAndUpdate(req.params.sessionID, 
-            {$push : {members: sessionMember}}
-        )
-        res.json(sessionMember)
-    } catch (err) {
-        console.log("Error joining session: \n" + err)
-        res.status(500).json({message: err})
-    }
-})
-
-// PATCH: Update a member's data -> req.body = SessionMember
-router.patch('/:sessionID/members', async (req, res) => {
-    const query = {_id: req.params.sessionID, "members._id": req.body._id}
-    const update = {$set: {"members.$": req.body}}
-    try {
-        const updatedSession = await Session.findOneAndUpdate(query, update)
-        res.json(updatedSession)
-    } catch (err) {
-        console.log(err)
-        res.status(500).json({message: err})
+        await Club.findByIdAndUpdate(req.params.sessionID, {
+            $addToSet: {
+                memberUIDs: req.body.uid,
+                activityIDs: req.body.activityID
+            }
+        })
+        res.json({message: 'Your request to join this session was succesful'})
+    } catch(error) {
+        console.log(error)
+        res.status(500).json({message: error})
     }
 })
     
