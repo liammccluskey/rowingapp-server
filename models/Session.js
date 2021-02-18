@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const SessionMember = require('./SessionMember')
 
 const SessionSchema = mongoose.Schema({
     title: {
