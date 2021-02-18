@@ -38,7 +38,7 @@ router.patch('/:activityID', async (req,res) => {
         const updatedActivity = await Activity.findByIdAndUpdate(req.params.activityID, {
             $set: req.body
         })
-        res.json(updatedActivity)
+        res.json({message: 'your activity was updated successfully'})
     } catch (error) {
         res.status(500).json({message: error})
     }
