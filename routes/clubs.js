@@ -81,22 +81,6 @@ router.post('/', async (req, res) => {
     }
 })
 
-// PATCH: join a session
-router.patch('/:clubID/join', async (req, res) => {
-    try {
-        await Club.findByIdAndUpdate(req.params.clubID, {
-            $addToSet: {
-                memberUIDs: req.body.uid,
-                activityIDs: req.body.activityID
-            }
-        })
-        res.json({message: 'Your request to join this session was succesful'})
-    } catch(error) {
-        console.log(error)
-        res.status(500).json({message: error})
-    }
-})
-
 router.patch('/:clubID/join', async (req,res) => {
     try {
         const updatedClub = await Club.findByIdAndUpdate(req.params.clubID, 
@@ -116,3 +100,5 @@ router.patch('/:clubID/join', async (req,res) => {
 
 
  module.exports = router
+
+ 
