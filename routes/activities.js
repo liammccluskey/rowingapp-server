@@ -7,7 +7,7 @@ const Activity = require('../models/Activity')
 // GET: specific activity by ID
 router.get('/:activityID', async (req,res) => {
     try {
-        const activity = await Activity.findById(req.params.activityID)
+        const activity = await Activity.findById(req.params.activityID).lean()
         res.json(activity)
     } catch (error) {
         res.status(500).json({message: error})
