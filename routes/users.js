@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../models/User')
+const Activity = require('../models/Activity')
+const moment = require('moment')
 
 // PATH: /users
 
@@ -15,13 +17,37 @@ router.get('/', async (req,res) => {
     }
 })
 
+
 router.get('/:uid', async (req, res) => {
-    console.log(req.params.uid)
     try {
         const user = await User.findOne({
             uid: req.params.uid
         })
         res.json(user)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({message: error})
+    }
+})
+
+
+// GET: get use stats (week, month, year meters) AND (user pr's)
+router.get('/:uid/stats', async (req, res) => {
+    console.log('did hit user stats route')
+    try {
+        const stats = await Activity.aggregate([
+            {$match: {
+                $and: [
+                    {uid: req.params.uid},
+                    {isReady: false}
+                ]
+            }},
+            {$group: {
+                _id: null,
+                meters: {$sum: '$totalDistance'}
+            }}
+        ])
+        res.json(stats)
     } catch (error) {
         console.log(error)
         res.status(500).json({message: error})
