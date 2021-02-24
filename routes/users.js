@@ -34,12 +34,13 @@ router.get('/:uid', async (req, res) => {
 // GET: get use stats (week, month, year meters) AND (user pr's)
 router.get('/:uid/stats', async (req, res) => {
     console.log('did hit user stats route')
+    console.log(moment().startOf('year'))
     try {
-        const stats = await Activity.aggregate([
+        const y = await Activity.aggregate([
             {$match: {
                 $and: [
                     {uid: req.params.uid},
-                    {isReady: false}
+                    {createdAt: {$gte: moment().startOf('year').toDate()}}
                 ]
             }},
             {$group: {
@@ -47,6 +48,40 @@ router.get('/:uid/stats', async (req, res) => {
                 meters: {$sum: '$totalDistance'}
             }}
         ])
+        const m = await Activity.aggregate([
+            {$match: {
+                $and: [
+                    {uid: req.params.uid},
+                    {createdAt: {$gte: moment().startOf('month').toDate()}}
+                ]
+            }},
+            {$group: {
+                _id: null,
+                meters: {$sum: '$totalDistance'}
+            }}
+        ])
+        const w = await Activity.aggregate([
+            {$match: {
+                $and: [
+                    {uid: req.params.uid},
+                    {createdAt: {$gte: moment().startOf('week').toDate() }}
+                ]
+            }},
+            {$group: {
+                _id: null,
+                meters: {$sum: '$totalDistance'}
+            }}
+        ])
+        console.log({
+            year: y,
+            month: m,
+            week: w
+        })
+        const stats = {
+            week: w.length ? w[0].meters : 0,
+            month: m.length ? m[0].meters : 0,
+            year: y.length ? y[0].meters : 0
+        }
         res.json(stats)
     } catch (error) {
         console.log(error)
