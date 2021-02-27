@@ -84,6 +84,24 @@ router.get('/:sessionID/activities', async(req, res) => {
     }
 })
 
+// GET: all users from a session
+/*
+    USE CASE: Display names (and icon?) of all members of a session
+*/
+router.get('/:sessionID/members', async (req, res) => {
+    try {
+        const session = await Session.findById(req.params.sessionID)
+        const members = await User.find({
+            uid: {
+                $in: session.memberIDs
+            }
+        })
+        res.json(members)
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
 // POST: create new session
 router.post('/', async (req,res) => {
     const session = new Session({
