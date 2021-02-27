@@ -62,17 +62,20 @@ router.get('/:sessionID', async (req,res) => {
     USE CASE: full display of session members' activity (all member activity)
 */
 router.get('/:sessionID/activities', async(req, res) => {
+    console.log('did request session activites')
     try {
         const session = await Session.findById(req.params.sessionID)
         if (!session.activityIDs.length) {
             res.json(Array(session.workoutItems.length).fill([]))
             return
         }
+        console.log(session.activityIDs)
         const activities = Activity.find({
             _id: {
                 $in: session.activityIDs
             }
-        })
+        }).lean()
+        console.log(activities)
         res.json(
             session.workoutItems.map((item, i) => (
                 activities.filter(ac => ac.workoutItemIndex === i)
