@@ -91,6 +91,10 @@ router.get('/:sessionID/activities', async(req, res) => {
 router.get('/:sessionID/members', async (req, res) => {
     try {
         const session = await Session.findById(req.params.sessionID)
+        if (!session.memberUIDs.length) {
+            res.json([])
+            return 
+        }
         const members = await User.find({
             uid: {
                 $in: session.memberUIDs
