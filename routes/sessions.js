@@ -93,7 +93,7 @@ router.get('/:sessionID/members', async (req, res) => {
         const session = await Session.findById(req.params.sessionID)
         const members = await User.find({
             uid: {
-                $in: session.memberIDs
+                $in: session.memberUIDs
             }
         })
         res.json(members)
