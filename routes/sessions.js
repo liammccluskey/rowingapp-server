@@ -64,13 +64,17 @@ router.get('/:sessionID', async (req,res) => {
 router.get('/:sessionID/activities', async(req, res) => {
     try {
         const session = await Session.findById(req.params.sessionID)
+        if (!session.activityIDs.length) {
+            res.json(Array(session.workoutItems.length).fill([]))
+            return
+        }
         const activities = Activity.find({
             _id: {
                 $in: session.activityIDs
             }
         })
         res.json(
-            workoutItems.map((item, i) => (
+            session.workoutItems.map((item, i) => (
                 activities.filter(ac => ac.workoutItemIndex === i)
             ))
         )
