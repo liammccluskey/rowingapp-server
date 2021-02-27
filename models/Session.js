@@ -27,11 +27,15 @@ const SessionSchema = mongoose.Schema({
         required: true,
         index: true
     },
+    workoutItems: {   // Text description of each workout item (ex. : 2k 2 warmup, 10k SS, etc.)
+        type: [String],
+        required: true
+    },
     memberUIDs: {
         type: [String],
         default: []
     },
-    activityIDs: {
+    activityIDs: { 
         type: [String],
         default: []
     },
@@ -39,15 +43,6 @@ const SessionSchema = mongoose.Schema({
         type: Boolean,
         default: false
     }
-})
-
-
-// Virtuals
-SessionSchema.virtual('numMembers').get(function() {
-    return this.members.length
-})
-SessionSchema.virtual('numMembersReady').get(function() {
-    return this.members.filter(member => member.isReady).length
 })
 
 module.exports = mongoose.model('Session', SessionSchema)

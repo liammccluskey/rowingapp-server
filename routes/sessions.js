@@ -59,18 +59,21 @@ router.get('/:sessionID', async (req,res) => {
 
 // GET: activites data from session
 /*
-    USE CASE: full display of session data (all member activity)
+    USE CASE: full display of session members' activity (all member activity)
 */
 router.get('/:sessionID/activities', async(req, res) => {
-    console.log('did hit route')
     try {
         const session = await Session.findById(req.params.sessionID)
-        const activities = await Activity.find({
+        const activities = Activity.find({
             _id: {
                 $in: session.activityIDs
             }
         })
-        res.json(activities)
+        res.json(
+            workoutItems.map((item, i) => (
+                activities.filter(ac => ac.workoutItemIndex === i)
+            ))
+        )
     } catch (error) {
         console.log(error)
         res.status(500).json({message: error})
@@ -85,14 +88,13 @@ router.post('/', async (req,res) => {
         hostUID: req.body.hostUID,
         startAt: req.body.startAt,
         isAccessibleByLink: req.body.isAccessibleByLink,
-        associatedClubID: req.body.associatedClubID
+        associatedClubID: req.body.associatedClubID,
+        workoutItems: req.body.workoutItems
     })
-    console.log(req.body)
     try {
         const savedSession = await session.save()
         res.json(session)
     } catch (err) {
-        console.log(err)
         res.status(500).json({message: err})
     }
 })
@@ -102,13 +104,25 @@ router.patch('/:sessionID/join', async (req, res) => {
     try {
         await Session.findByIdAndUpdate(req.params.sessionID, {
             $addToSet: {
-                memberUIDs: req.body.uid,
-                activityIDs: req.body.activityID
+                memberUIDs: req.body.uid
             }
         })
         res.json({message: 'Your request to join this session was succesful'})
     } catch(error) {
-        console.log(error)
+        res.status(500).json({message: error})
+    }
+})
+
+// PATCH: begin a session's workout item
+router.patch('/:sessionID/begin/:workoutItemIndex', async (req, res) => {
+    try {
+        await Session.findByIdAndUpdate(req.params.sessionID, {
+            $addToSet: {
+                activityIDs: req.body.activityID
+            }
+        })
+        res.json({message: 'Your request to begin this item was successful'})
+    } catch (error) {
         res.status(500).json({message: error})
     }
 })

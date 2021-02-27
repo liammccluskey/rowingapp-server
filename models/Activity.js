@@ -5,9 +5,13 @@ const ActivitySchema = mongoose.Schema({
         type: String,
         required: true,
         index: true
-    }, 
+    },
     name: { // user's name
         type: String,
+        required: true
+    },
+    workoutItemIndex: {
+        type: Number,
         required: true
     },
     currentPace:{

@@ -33,8 +33,6 @@ router.get('/:uid', async (req, res) => {
 
 // GET: get use stats (week, month, year meters) AND (user pr's)
 router.get('/:uid/stats', async (req, res) => {
-    console.log('did hit user stats route')
-    console.log(moment().startOf('year'))
     try {
         const y = await Activity.aggregate([
             {$match: {
@@ -72,11 +70,6 @@ router.get('/:uid/stats', async (req, res) => {
                 meters: {$sum: '$totalDistance'}
             }}
         ])
-        console.log({
-            year: y,
-            month: m,
-            week: w
-        })
         const stats = {
             week: w.length ? w[0].meters : 0,
             month: m.length ? m[0].meters : 0,
