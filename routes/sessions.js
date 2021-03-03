@@ -137,7 +137,7 @@ router.post('/', async (req,res) => {
         res.status(500).json({message: err})
     }
 })
-/*
+
 // PATCH: join a session
 router.patch('/:sessionID/join', async (req, res) => {
     try {
@@ -151,7 +151,7 @@ router.patch('/:sessionID/join', async (req, res) => {
         res.status(500).json({message: error})
     }
 })
-
+/*
 // PATCH: begin a session's workout item
 router.patch('/:sessionID/begin/:workoutItemIndex', async (req, res) => {
     try {
