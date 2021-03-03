@@ -46,4 +46,15 @@ router.patch('/:activityID', async (req,res) => {
     }
 })
 
+router.patch('/:activityID/complete', async (req, res) => {
+    try {
+        await Activity.findByIdAndUpdate(req.params.activityID, {
+            $set: {isCompleted: true}
+        })
+        res.json({message: 'your request to finish this activity was successful'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
 module.exports = router
