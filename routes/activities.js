@@ -19,7 +19,8 @@ router.post('/', async (req,res) => {
     const activity = new Activity({
         uid: req.body.uid,
         name: req.body.name,
-        workoutItemIndex: req.body.workoutItemIndex
+        workoutItemIndex: req.body.workoutItemIndex,
+        sessionID: req.body.sessionID
     })
     try {
         const savedActivity = await activity.save()

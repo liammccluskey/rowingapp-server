@@ -35,10 +35,6 @@ const SessionSchema = mongoose.Schema({
         type: [String],
         default: []
     },
-    activityIDs: { 
-        type: [String],
-        default: []
-    },
     isCompleted: {
         type: Boolean,
         default: false

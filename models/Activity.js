@@ -14,6 +14,11 @@ const ActivitySchema = mongoose.Schema({
         type: Number,
         required: true
     },
+    sessionID: {
+        type: String,
+        requried: true,
+        index: true
+    },
     currentPace:{
         type: Number,
         default: 0
@@ -38,7 +43,7 @@ const ActivitySchema = mongoose.Schema({
         type: Number,   // seconds
         default: 0, 
     },
-    isReady: {
+    isCompleted: {
         type: Boolean,
         default: false
     }

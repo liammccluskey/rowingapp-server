@@ -58,6 +58,22 @@ router.get('/:sessionID', async (req,res) => {
 /*
     USE CASE: full display of session members' activity (all member activity)
 */
+router.get('/:sessionID/activities', async (req, res) => {
+    try {
+        const session = await Session.findById(req.params.sessionID).select('workoutItems')
+        const activities = await Activity.find({
+            sessionID: req.params.sessionID
+        })
+        res.json(
+            session.workoutItems.map((item, i) => (
+                activities.filter(ac => ac.workoutItemIndex === i)
+            ))
+        )
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+/*
 router.get('/:sessionID/activities', async(req, res) => {
     try {
         const session = await Session.findById(req.params.sessionID)
@@ -80,14 +96,14 @@ router.get('/:sessionID/activities', async(req, res) => {
         res.status(500).json({message: error})
     }
 })
-
+*/
 // GET: all users from a session
 /*
     USE CASE: Display names (and icon?) of all members of a session
 */
 router.get('/:sessionID/members', async (req, res) => {
     try {
-        const session = await Session.findById(req.params.sessionID)
+        const session = await Session.findById(req.params.sessionID).select('memberUIDs')
         if (!session.memberUIDs.length) {
             res.json([])
             return 
@@ -96,7 +112,7 @@ router.get('/:sessionID/members', async (req, res) => {
             uid: {
                 $in: session.memberUIDs
             }
-        })
+        }).select('displayName')
         res.json(members)
     } catch (error) {
         res.status(500).json({message: error})
@@ -121,7 +137,7 @@ router.post('/', async (req,res) => {
         res.status(500).json({message: err})
     }
 })
-
+/*
 // PATCH: join a session
 router.patch('/:sessionID/join', async (req, res) => {
     try {
@@ -149,5 +165,5 @@ router.patch('/:sessionID/begin/:workoutItemIndex', async (req, res) => {
         res.status(500).json({message: error})
     }
 })
-    
+    */
 module.exports = router
