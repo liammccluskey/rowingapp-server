@@ -102,7 +102,7 @@ router.post('/', async (req, res) =>{
 // PATCH: update user color pref
 router.patch('/:uid/color-theme', async (req, res) => {
     try {
-        User.findOneAndUpdate(
+        await User.findOneAndUpdate(
             {uid: req.params.uid},
             {$set: {
                 usesDarkMode: req.body.usesDarkMode
