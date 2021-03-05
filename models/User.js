@@ -14,6 +14,10 @@ const UserSchema = mongoose.Schema({
     clubIDs: {
         type: [String],
         default: []
+    },
+    usesDarkMode: {
+        type: Boolean,
+        default: false
     }
 }, {timestamps: true})
 
