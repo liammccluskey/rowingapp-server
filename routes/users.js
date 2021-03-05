@@ -102,11 +102,12 @@ router.post('/', async (req, res) =>{
 // PATCH: update user color pref
 router.patch('/:uid/color-theme', async (req, res) => {
     try {
-        User.findByIdAndUpdate(req.params.uid, {
-            $set: {
+        User.findOneAndUpdate(
+            {uid: req.params.uid},
+            {$set: {
                 usesDarkMode: req.body.usesDarkMode
-            }
-        })
+            }}
+        )
         res.json({message: 'color theme update sucessful'})
     } catch (error) {
         res.status(500).json({message: error})
