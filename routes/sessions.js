@@ -73,30 +73,7 @@ router.get('/:sessionID/activities', async (req, res) => {
         res.status(500).json({message: error})
     }
 })
-/*
-router.get('/:sessionID/activities', async(req, res) => {
-    try {
-        const session = await Session.findById(req.params.sessionID)
-        if (!session.activityIDs.length) {
-            res.json(Array(session.workoutItems.length).fill([]))
-            return
-        }
-        const activities = await Activity.find({
-            _id: {
-                $in: session.activityIDs
-            }
-        }).lean()
-        res.json(
-            session.workoutItems.map((item, i) => (
-                activities.filter(ac => ac.workoutItemIndex === i)
-            ))
-        )
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({message: error})
-    }
-})
-*/
+
 // GET: all users from a session
 /*
     USE CASE: Display names (and icon?) of all members of a session
@@ -151,19 +128,5 @@ router.patch('/:sessionID/join', async (req, res) => {
         res.status(500).json({message: error})
     }
 })
-/*
-// PATCH: begin a session's workout item
-router.patch('/:sessionID/begin/:workoutItemIndex', async (req, res) => {
-    try {
-        await Session.findByIdAndUpdate(req.params.sessionID, {
-            $addToSet: {
-                activityIDs: req.body.activityID
-            }
-        })
-        res.json({message: 'Your request to begin this item was successful'})
-    } catch (error) {
-        res.status(500).json({message: error})
-    }
-})
-    */
+
 module.exports = router
