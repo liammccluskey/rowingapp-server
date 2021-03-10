@@ -4,6 +4,7 @@ const Activity = require('../models/Activity')
 
 // PATH: /activities
 
+
 // GET: specific activity by ID
 router.get('/:activityID', async (req,res) => {
     try {

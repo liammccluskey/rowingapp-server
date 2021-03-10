@@ -82,6 +82,60 @@ router.get('/:uid/stats', async (req, res) => {
     }
 })
 
+router.get('/:uid/statistics', async (req, res) => {
+    try {
+        const weekActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: moment().startOf('week').toDate() } 
+        })
+        const monthActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: moment().startOf('month').toDate() } 
+        })
+        const yearActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: moment().startOf('year').toDate() } 
+        })
+
+        const week = Array(7).fill(0)
+        const month = Array(moment().daysInMonth()).fill(0)
+        const year = Array(12).fill(0)
+
+        const aggregate = {
+            weekMeters: 0,
+            monthMeters: 0,
+            yearMeters: 0
+        }
+
+        weekActivities.forEach(ac => {
+            const dayID = moment(ac.createdAt).isoWeekday() - 1 // 1 indexed
+            week[dayID] += ac.totalDistance
+            aggregate.weekMeters += ac.totalDistance
+        })
+        monthActivities.forEach(ac => {
+            const dayID = moment(ac.createdAt).date() - 1       // 1 indexed
+            month[dayID] += ac.totalDistance
+            aggregate.monthMeters += ac.totalDistance
+        })
+        yearActivities.forEach( ac => {
+            const monthID = moment(ac.createAt).month()         // 0 indexed
+            year[monthID] += ac.totalDistance
+            aggregate.yearMeters += ac.totalDistance
+        })
+
+        res.json({
+            aggregate: aggregate,
+            plottable: {
+                weekMeters: week,
+                monthMeters: month,
+                yearMeters: year
+            }
+        })    
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
 
 // POST: create a new user
 router.post('/', async (req, res) =>{
