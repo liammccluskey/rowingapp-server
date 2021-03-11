@@ -27,21 +27,25 @@ const ActivitySchema = mongoose.Schema({
         type: Number,
         default: 0
     },
-    totalDistance: {
+    distance: {
         type: Number,
         default: 0
     }, 
-    currentStrokeRate: {
+    strokeRate: {   // current stroke rate ?
         type: Number,
         default: 0
     },
-    averageStrokeRate: {
+    avgStrokeRate: { // average stroke rate
         type: Number,
         default: 0
     },
-    totalTime: {
+    elapsedTime: {
         type: Number,   // seconds
         default: 0, 
+    },
+    workoutType: {
+        type: Number,
+        default: -1 // invalid type default
     },
     isCompleted: {
         type: Boolean,
