@@ -109,18 +109,18 @@ router.get('/:uid/statistics', async (req, res) => {
 
         weekActivities.forEach(ac => {
             const dayID = moment.utc(ac.createdAt).day() // 0 indexed
-            week[dayID] += ac.totalDistance
-            aggregate.weekMeters += ac.totalDistance
+            week[dayID] += ac.distance
+            aggregate.weekMeters += ac.distance
         })
         monthActivities.forEach(ac => {
             const dayID = moment.utc(ac.createdAt).date() - 1       // 1 indexed
-            month[dayID] += ac.totalDistance
-            aggregate.monthMeters += ac.totalDistance
+            month[dayID] += ac.distance
+            aggregate.monthMeters += ac.distance
         })
         yearActivities.forEach( ac => {
             const monthID = moment.utc(ac.createAt).month()         // 0 indexed
-            year[monthID] += ac.totalDistance
-            aggregate.yearMeters += ac.totalDistance
+            year[monthID] += ac.distance
+            aggregate.yearMeters += ac.distance
         })
 
         res.json({
