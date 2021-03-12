@@ -47,6 +47,10 @@ const ActivitySchema = mongoose.Schema({
         type: Number,
         default: -1 // invalid type default
     },
+    totalCalories: {
+        type: Number,
+        default: 0
+    },
     isCompleted: {
         type: Boolean,
         default: false
