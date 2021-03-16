@@ -3,6 +3,7 @@ const router = express.Router()
 const User = require('../models/User')
 const Activity = require('../models/Activity')
 const moment = require('moment')
+const { months } = require('moment')
 
 // PATH: /users
 
@@ -83,18 +84,19 @@ router.get('/:uid/stats', async (req, res) => {
 })
 
 router.get('/:uid/statistics', async (req, res) => {
+    // Timeframes are this (week, month, year)
     try {
         const weekActivities = await Activity.find({
             uid: req.params.uid,
-            createdAt: {$gte: moment().startOf('week').toDate() } 
+            createdAt: {$gte: moment().startOf('week').startOf('day').toDate() } 
         })
         const monthActivities = await Activity.find({
             uid: req.params.uid,
-            createdAt: {$gte: moment().startOf('month').toDate() } 
+            createdAt: {$gte: moment().startOf('month').startOf('day').toDate() } 
         })
         const yearActivities = await Activity.find({
             uid: req.params.uid,
-            createdAt: {$gte: moment().startOf('year').toDate() } 
+            createdAt: {$gte: moment().startOf('year').startOf('month').toDate() } 
         })
 
         const week = Array(7).fill(0)
@@ -108,7 +110,7 @@ router.get('/:uid/statistics', async (req, res) => {
         }
 
         weekActivities.forEach(ac => {
-            const dayID = moment(ac.createdAt).day() // 0 indexed
+            const dayID = moment(ac.createdAt).day()            // 0 indexed
             week[dayID] += ac.distance
             aggregate.weekMeters += ac.distance
         })
@@ -131,6 +133,98 @@ router.get('/:uid/statistics', async (req, res) => {
                 yearMeters: year
             }
         })    
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+router.get('/:uid/statistics-full', async (req, res) => {
+    // Timeframes are past (week, month, year)
+    const weekStart = moment().endOf('day').subtract(1, 'week').startOf('day')
+    const monthStart = moment().endOf('day').subtract(1, 'month').startOf('day')
+    const yearStart = moment().endOf('day').subtract(1, 'year').startOf('month')
+
+    try {
+        const weekActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: weekStart.toDate() } 
+        })
+        const monthActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: monthStart.toDate() } 
+        })
+        const yearActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: yearStart.toDate() } 
+        })
+
+        const end = moment().endOf('day')
+        const monthLength = end.clone().diff( monthStart, 'days')
+
+        const plottable = {
+            week: {
+                meters: Array(7).fill(0),
+                time: Array(7).fill(0),
+                calories: Array(7).fill(0)
+            },
+            month: {
+                meters: Array(monthLength).fill(0),
+                time: Array(monthLength).fill(0),
+                calories: Array(monthLength).fill(0)
+            },
+            year: {
+                meters: Array(12).fill(0),
+                time: Array(12).fill(0),
+                calories: Array(12).fill(0)
+            }
+        }
+
+        const aggregate = {
+            week : {
+                meters: 0,
+                time: 0,
+                calories: 0
+            },
+            month: {
+                meters: 0,
+                time: 0,
+                calories: 0
+            },
+            year: {
+                meters: 0,
+                time: 0,
+                calories: 0
+            }
+        }
+
+        function extractActivityToJSON(activity, dataIndex, timeframe) {
+            aggregate[timeframe].meters += ac.distance
+            aggregate[timeframe].time += ac.elapsedTime
+            aggregate[timeframe].calories += ac.totalCalories
+
+            plottable[timeframe].meters[dataIndex] += ac.distance
+            plottable[timeframe].time[dataIndex] += ac.elapsedTime
+            plottable[timeframe].calories[dataIndex] += ac.totalCalories
+        }
+
+        weekActivities.forEach(ac => {
+            const dataIndex = moment(ac.createdAt).diff(weekStart, 'days')
+            extractActivityToJSON(ac, dataIndex, 'week')
+        })
+        monthActivities.forEach(ac => {
+            const dataIndex = moment(ac.createdAt).diff(monthStart, 'days')
+            extractActivityToJSON(ac, dataIndex, 'month')
+        })
+        yearActivities.forEach( ac => {
+            const dataIndex = moment(ac.createdAt).diff(yearStart, 'months')
+            extractActivityToJSON(ac, dataIndex, 'year')
+        })
+
+        res.json({
+            aggregate: aggregate,
+            plottable: plottable
+        })    
+
     } catch (error) {
         res.status(500).json({message: error})
     }
