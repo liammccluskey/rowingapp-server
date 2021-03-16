@@ -173,9 +173,9 @@ router.get('/:uid/statistics-full', async (req, res) => {
                 calories: Array(monthLength).fill(0)
             },
             year: {
-                meters: Array(12).fill(0),
-                time: Array(12).fill(0),
-                calories: Array(12).fill(0)
+                meters: Array(13).fill(0),
+                time: Array(13).fill(0),
+                calories: Array(13).fill(0)
             }
         }
 
@@ -198,13 +198,13 @@ router.get('/:uid/statistics-full', async (req, res) => {
         }
 
         function extractActivityToJSON(ac, dataIndex, timeframe) {
-            aggregate[timeframe].meters += ac.distance
-            aggregate[timeframe].time += ac.elapsedTime
-            aggregate[timeframe].calories += ac.totalCalories
+            aggregate[timeframe].meters += Math.round(ac.distance)
+            aggregate[timeframe].time += Math.round(ac.elapsedTime)
+            aggregate[timeframe].calories += Math.round(ac.totalCalories)
 
-            plottable[timeframe].meters[dataIndex] += ac.distance
-            plottable[timeframe].time[dataIndex] += ac.elapsedTime
-            plottable[timeframe].calories[dataIndex] += ac.totalCalories
+            plottable[timeframe].meters[dataIndex] += Math.round(ac.distance)
+            plottable[timeframe].time[dataIndex] += Math.round(ac.elapsedTime)
+            plottable[timeframe].calories[dataIndex] += Math.round(ac.totalCalories)
         }
 
         weekActivities.forEach(ac => {
