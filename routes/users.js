@@ -197,7 +197,7 @@ router.get('/:uid/statistics-full', async (req, res) => {
             }
         }
 
-        function extractActivityToJSON(activity, dataIndex, timeframe) {
+        function extractActivityToJSON(ac, dataIndex, timeframe) {
             aggregate[timeframe].meters += ac.distance
             aggregate[timeframe].time += ac.elapsedTime
             aggregate[timeframe].calories += ac.totalCalories
@@ -217,6 +217,7 @@ router.get('/:uid/statistics-full', async (req, res) => {
         })
         yearActivities.forEach( ac => {
             const dataIndex = moment(ac.createdAt).diff(yearStart, 'months')
+            console.log(dataIndex)
             extractActivityToJSON(ac, dataIndex, 'year')
         })
 
