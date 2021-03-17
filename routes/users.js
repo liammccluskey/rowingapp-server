@@ -140,27 +140,40 @@ router.get('/:uid/statistics', async (req, res) => {
 
 router.get('/:uid/statistics-full', async (req, res) => {
     // Timeframes are past (week, month, year)
-    const weekStart = moment().endOf('day').subtract(1, 'week').startOf('day')
-    const monthStart = moment().endOf('day').subtract(1, 'month').startOf('day')
-    const yearStart = moment().endOf('day').subtract(1, 'year').startOf('month')
+    const weekStart = moment().subtract(1, 'week').startOf('day')
+    const monthStart = moment().subtract(1, 'month').startOf('day')
+    const yearStart = moment().subtract(1, 'year').startOf('month')
 
     try {
+        // past timeframes
         const weekActivities = await Activity.find({
             uid: req.params.uid,
-            createdAt: {$gte: weekStart.toDate() } 
-        })
+            createdAt: {$gte: weekStart.clone().toDate() } 
+        }).lean()
         const monthActivities = await Activity.find({
             uid: req.params.uid,
-            createdAt: {$gte: monthStart.toDate() } 
-        })
+            createdAt: {$gte: monthStart.clone().toDate() } 
+        }).lean()
         const yearActivities = await Activity.find({
             uid: req.params.uid,
-            createdAt: {$gte: yearStart.toDate() } 
-        })
+            createdAt: {$gte: yearStart.clone().toDate() } 
+        }).lean()
 
-        const end = moment().endOf('day')
-        const monthLength = end.clone().diff( monthStart, 'days')
+        // past past timeframes
+        const prevWeekActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: weekStart.clone().subtract(1, 'week').toDate(), $lte: weekStart.clone().toDate() } 
+        }).lean()
+        const prevMonthActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: monthStart.clone().subtract(1, 'month').toDate(), $lte: monthStart.clone().toDate() } 
+        }).lean()
+        const prevYearActivities = await Activity.find({
+            uid: req.params.uid,
+            createdAt: {$gte: yearStart.clone().subtract(1, 'year').toDate(), $lte: yearStart.clone().toDate() } 
+        }).lean()
 
+        const monthLength = moment().diff( monthStart, 'days')
         const plottable = {
             week: {
                 meters: Array(7).fill(0),
@@ -197,6 +210,8 @@ router.get('/:uid/statistics-full', async (req, res) => {
             }
         }
 
+        const aggregatePrev = JSON.parse(JSON.stringify(aggregate))
+
         function extractActivityToJSON(ac, dataIndex, timeframe) {
             aggregate[timeframe].meters += Math.round(ac.distance)
             aggregate[timeframe].time += Math.round(ac.elapsedTime)
@@ -207,6 +222,7 @@ router.get('/:uid/statistics-full', async (req, res) => {
             plottable[timeframe].calories[dataIndex] += Math.round(ac.totalCalories)
         }
 
+        // extract curr stats
         weekActivities.forEach(ac => {
             const dataIndex = moment(ac.createdAt).diff(weekStart, 'days')
             extractActivityToJSON(ac, dataIndex, 'week')
@@ -217,16 +233,41 @@ router.get('/:uid/statistics-full', async (req, res) => {
         })
         yearActivities.forEach( ac => {
             const dataIndex = moment(ac.createdAt).diff(yearStart, 'months')
-            console.log(dataIndex)
             extractActivityToJSON(ac, dataIndex, 'year')
         })
 
+        function extractPrevActivityToJSON(ac, timeframe) {
+            aggregatePrev[timeframe].meters += Math.round(ac.distance)
+            aggregatePrev[timeframe].time += Math.round(ac.elapsedTime)
+            aggregatePrev[timeframe].calories += Math.round(ac.totalCalories)
+        }
+
+        // extract prev timeframe stats (percent change)
+        prevWeekActivities.forEach(ac => { extractPrevActivityToJSON(ac, 'week') })
+        prevMonthActivities.forEach(ac => { extractPrevActivityToJSON(ac, 'month') })
+        prevYearActivities.forEach(ac => { extractPrevActivityToJSON(ac, 'year') })
+
+        const timeframes = ['week', 'month', 'year']
+        const metrics = ['meters', 'time', 'calories']
+        timeframes.forEach(timeframe => 
+            metrics.forEach(metric => {
+                const init = aggregatePrev[timeframe][metric]
+                const final = aggregate[timeframe][metric]
+                if (init === 0) {
+                    aggregatePrev[timeframe][metric] = 0
+                } else {
+                    aggregatePrev[timeframe][metric] = Math.round( (final - init)/init * 100 )
+                }
+            })
+        )
+
         res.json({
             aggregate: aggregate,
-            plottable: plottable
+            plottable: plottable,
+            delta: aggregatePrev
         })    
-
     } catch (error) {
+        console.log(error)
         res.status(500).json({message: error})
     }
 })
