@@ -272,10 +272,10 @@ router.get('/:uid/statistics-progress', async (req, res) => {
 
         activitiesByTimeframe.forEach( (activities, i) => {
             const key = keys[i]
-            
+
             plottable[key] = activities.map(ac => ({
-                x: ac.averagePace,
-                y: moment(ac.createdAt)
+                y: ac.averagePace,
+                x: moment(ac.createdAt)
             }))
 
             summary[key].count = activities.length
