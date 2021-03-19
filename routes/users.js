@@ -4,6 +4,7 @@ const User = require('../models/User')
 const Activity = require('../models/Activity')
 const moment = require('moment')
 const { months } = require('moment')
+const { count } = require('../models/Activity')
 
 // PATH: /users
 
@@ -25,58 +26,6 @@ router.get('/:uid', async (req, res) => {
             uid: req.params.uid
         })
         res.json(user)
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({message: error})
-    }
-})
-
-
-// GET: get use stats (week, month, year meters) AND (user pr's)
-router.get('/:uid/stats', async (req, res) => {
-    try {
-        const y = await Activity.aggregate([
-            {$match: {
-                $and: [
-                    {uid: req.params.uid},
-                    {createdAt: {$gte: moment().startOf('year').toDate()}}
-                ]
-            }},
-            {$group: {
-                _id: null,
-                meters: {$sum: '$totalDistance'}
-            }}
-        ])
-        const m = await Activity.aggregate([
-            {$match: {
-                $and: [
-                    {uid: req.params.uid},
-                    {createdAt: {$gte: moment().startOf('month').toDate()}}
-                ]
-            }},
-            {$group: {
-                _id: null,
-                meters: {$sum: '$totalDistance'}
-            }}
-        ])
-        const w = await Activity.aggregate([
-            {$match: {
-                $and: [
-                    {uid: req.params.uid},
-                    {createdAt: {$gte: moment().startOf('week').toDate() }}
-                ]
-            }},
-            {$group: {
-                _id: null,
-                meters: {$sum: '$totalDistance'}
-            }}
-        ])
-        const stats = {
-            week: w.length ? w[0].meters : 0,
-            month: m.length ? m[0].meters : 0,
-            year: y.length ? y[0].meters : 0
-        }
-        res.json(stats)
     } catch (error) {
         console.log(error)
         res.status(500).json({message: error})
@@ -138,7 +87,7 @@ router.get('/:uid/statistics', async (req, res) => {
     }
 })
 
-router.get('/:uid/statistics-full', async (req, res) => {
+router.get('/:uid/statistics-general', async (req, res) => {
     // Timeframes are past (week, month, year)
     const weekStart = moment().subtract(1, 'week').startOf('day')
     const monthStart = moment().subtract(1, 'month').startOf('day')
@@ -270,6 +219,86 @@ router.get('/:uid/statistics-full', async (req, res) => {
         console.log(error)
         res.status(500).json({message: error})
     }
+})
+
+// GET: plottable (line chart) activity trends (pace progression)
+/*
+    NOTE: currently only supports pace data
+*/
+router.get('/:uid/statistics-progress', async (req, res) => {
+    const startDates = [
+        moment().subtract(1, 'week').startOf('day'),    // week
+        moment().subtract(1, 'month').startOf('day'),   // month
+        moment().subtract(1, 'year').startOf('month'),  // year
+    ]
+
+    const keys = ['week', 'month', 'year']
+    // response
+    let summary = {
+        week: {
+            min: Infinity, max: -Infinity, avg: 0,
+            count: 0,
+        },
+        month: {
+            min: Infinity, max: -Infinity, avg: 0,
+            count: 0,
+        },
+        year: {
+            min: Infinity, max: -Infinity, avg: 0,
+            count: 0
+        }
+    }
+    let plottable = {
+        week: [],
+        month: [],
+        year: []
+    }
+
+    try {
+        const queries = startDates.map(startDate => (
+            {
+                uid: req.params.uid,
+                createdAt: { $gte: startDate.toDate() },
+                workoutType: { $gte: 0, $lte: 5},
+                distance: { $gte: req.query.gte, $lte: req.query.lte }
+            }
+        ))
+        
+        const activitiesByTimeframe = [
+            await Activity.find(queries[0]).lean(),
+            await Activity.find(queries[1]).lean(),
+            await Activity.find(queries[2]).lean()
+        ]
+
+        activitiesByTimeframe.forEach( (activities, i) => {
+            const key = keys[i]
+            
+            plottable[key] = activities.map(ac => ({
+                x: ac.averagePace,
+                y: moment(ac.createdAt)
+            }))
+
+            summary[key].count = activities.length
+            let sum = 0
+            activities.forEach( ac => {
+                summary[key].max = Math.max(summary[key].max, ac.averagePace)
+                summary[key].min = Math.min(summary[key].min, ac.averagePace)
+                sum += ac.averagePace
+            })
+            summary[key].avg = sum / activities.length
+        })
+
+        res.json({
+            summary: summary,
+            plottable: plottable
+        })
+
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({message: error})
+    }
+
 })
 
 
