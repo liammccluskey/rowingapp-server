@@ -265,9 +265,9 @@ router.get('/:uid/statistics-progress', async (req, res) => {
         ))
         
         const activitiesByTimeframe = [
-            await Activity.find(queries[0]).lean(),
-            await Activity.find(queries[1]).lean(),
-            await Activity.find(queries[2]).lean()
+            await Activity.find(queries[0]).sort( { createdAt: 1 }).lean(),
+            await Activity.find(queries[1]).sort( { createdAt: 1 }).lean(),
+            await Activity.find(queries[2]).sort( { createdAt: 1 }).lean()
         ]
 
         activitiesByTimeframe.forEach( (activities, i) => {
