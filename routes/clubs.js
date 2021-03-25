@@ -27,6 +27,7 @@ router.get('/uid/:uid', async (req, res) => {
 // GET: search for clubs with query
 /*
     supported fields: name
+    required field: page
 */
 router.get('/search', async (req, res) => {
     const query = {
@@ -40,7 +41,7 @@ router.get('/search', async (req, res) => {
         console.log(count)
 
         const clubs = await Club.find(query)
-            .skip(req.query.page*15)
+            .skip((req.query.page - 1)*15)
             .limit(15)
             .lean()
 
