@@ -40,7 +40,7 @@ router.get('/search', async (req, res) => {
 
         const clubs = await Club.find(query)
             .skip((req.query.page - 1)*2)
-            .limit(15)
+            .limit(2)
             .lean()
 
         res.json({
