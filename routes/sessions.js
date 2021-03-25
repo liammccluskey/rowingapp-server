@@ -3,9 +3,59 @@ const router = express.Router()
 const Session = require('../models/Session')
 const User = require('../models/User')
 const Activity = require('../models/Activity')
+const { route } = require('./users')
+const moment = require('moment')
 
 // PATH: /sessions
 
+// GET: Sessions that match M/D/Y query
+/*
+    if req.query.sparse === 1 -> only send minimal (for calendar)
+*/
+router.get('/uid/:uid', async (req, res) => {
+    const query = req.query
+
+    let startDate
+    let endDate
+
+    if (req.query.hasOwnProperty('day')) {
+        startDate = moment([query.year, query.month, query.day]).startOf('day').toDate()
+        endDate = moment([query.year, query.month, query.day]).endOf('day').toDate()
+    } else {
+        startDate = moment([query.year, query.month]).startOf('month').toDate()
+        endDate = moment([query.year, query.month]).endOf('month').toDate()
+    }
+    
+    let selectedFields
+    if (query.sparse === '1') {
+        selectedFields = 'startAt title'
+    } else {
+        selectedFields = 'startAt title associatedClubID hostUID'
+    }
+    
+    try {
+        const user = await User
+            .findOne({uid: req.params.uid})
+            .select('clubIDs')
+        const sessions = await Session.find({
+            startAt: {$gte: startDate, $lte: endDate},
+            $or: [
+                {hostUID: req.params.uid},
+                {associatedClubID: {$in: user.clubIDs}}
+            ]
+        })
+        .select(selectedFields)
+        .sort({startAt: 1})
+        .lean()
+
+        res.json(sessions)
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({message: error})
+    }
+
+})
 
 // GET: Active sessions hosted by uid, or where [uid in associatedClub.memberIDs]
 router.get('/incomplete/uid/:uid', async (req, res) => {
