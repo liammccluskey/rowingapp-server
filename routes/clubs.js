@@ -38,10 +38,8 @@ router.get('/search', async (req, res) => {
     try {
         const count = await Club.find(query).countDocuments()
 
-        console.log(count)
-
         const clubs = await Club.find(query)
-            .skip((req.query.page - 1)*15)
+            .skip((req.query.page - 1)*2)
             .limit(15)
             .lean()
 
