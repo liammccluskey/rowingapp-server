@@ -57,30 +57,6 @@ router.get('/uid/:uid', async (req, res) => {
 
 })
 
-// GET: Active sessions hosted by uid, or where [uid in associatedClub.memberIDs]
-router.get('/incomplete/uid/:uid', async (req, res) => {
-    try {
-        const user = await User
-            .findOne({uid: req.params.uid})
-            .select('clubIDs')
-
-        const sessions = await Session
-            .find({ 
-                $or: [
-                    {hostUID: req.params.uid},
-                    {associatedClubID: { $in: user.clubIDs } }
-                ],
-                isCompleted: false
-            })
-            .sort( { startAt: 1 } )
-
-        res.json(sessions)
-    } catch(error) {
-        res.status(500).json({message: error})
-    }
-    
-})
-
 // GET: all sessions
 router.get('/', async (req,res) => {
     try {
@@ -93,7 +69,7 @@ router.get('/', async (req,res) => {
 
 // GET: specific session 
 /*
-    USE CASE: shallow display of session (not all info needed)
+    USE CASE: shallow display of session (only near static info needed)
 */
 router.get('/:sessionID', async (req,res) => {
     try {
