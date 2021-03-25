@@ -23,23 +23,43 @@ router.get('/uid/:uid', async (req, res) => {
     }
 })
 
+
 // GET: search for clubs with query
+/*
+    supported fields: name
+*/
 router.get('/search', async (req, res) => {
-    console.log(req.query)
+    const query = {
+        $text: {
+            $search : req.query.name
+        }
+    }
     try {
-        const clubs = await Club.find(req.query)
-        res.json(clubs)
+        const count = await Club.find(query).countDocuments()
+
+        console.log(count)
+
+        const clubs = await Club.find(query)
+            .skip(req.query.page*15)
+            .limit(15)
+            .lean()
+
+        res.json({
+            clubs: clubs,
+            count: count
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({message: error})
     }
 })
 
-// GET: search for one club with query 
-router.get('/search-one', async (req, res) => {
-    console.log(req.query)
+// GET: get a specific club by customURL
+router.get('/customURL/:customURL', async (req, res) => {
     try {
-        const club = await Club.findOne(req.query)
+        const club = await Club.findOne({
+            customURL: req.params.customURL
+        })
         res.json(club)
     } catch (error) {
         console.log(error)

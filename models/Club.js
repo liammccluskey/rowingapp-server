@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const ClubSchema = mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
     },
     adminUIDs: {
         type: [String],
@@ -27,5 +27,17 @@ const ClubSchema = mongoose.Schema({
         required: true
     }
 }, {timestamps: true} )
+
+ClubSchema.index(
+    {
+        name: 'text',
+        description: 'text'
+    },
+    {
+        weights: {
+            name: 10,
+        }
+    }
+)
 
 module.exports = mongoose.model('Club', ClubSchema)
