@@ -30,6 +30,7 @@ router.get('/uid/:uid', async (req, res) => {
     required field: page
 */
 router.get('/search', async (req, res) => {
+    const pageSize = 15
     const query = {
         $text: {
             $search : req.query.name
@@ -39,8 +40,8 @@ router.get('/search', async (req, res) => {
         const count = await Club.find(query).countDocuments()
 
         const clubs = await Club.find(query)
-            .skip((req.query.page - 1)*2)
-            .limit(2)
+            .skip((req.query.page - 1)*pageSize)
+            .limit(pageSize)
             .lean()
 
         res.json({
