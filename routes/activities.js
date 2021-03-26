@@ -1,22 +1,52 @@
 const express = require('express')
 const router = express.Router()
 const Activity = require('../models/Activity')
+const Session = require('../models/Session')
 
 // PATH: /activities
 
 // GET: all a users complted activities
 /*
+    - results are paginated
     - currently no query filter supported
 */
 router.get('/uid/:uid', async (req, res) => {
+    const pageSize = 15
+    async function fetchSession(sessionID) {
+        try {
+            const session = Session.findById(sessionID)
+            .select('title hostUID associatedClubID')
+            .lean()
+            return session
+        } catch (error) {
+            console.log(error)
+            return {title: '', hostUID: '', associatedClubID: ''}
+        }
+    }
     try {
+        const activitiesCount = await Activity.find({
+            uid: req.params.uid
+        })
+        .countDocuments()
+
         const activities = await Activity.find({
             uid: req.params.uid
-        }).lean()
+        })
+        .skip( (req.query.page - 1) * pageSize)
+        .limit(pageSize)
+        .select('distance elapsedTime workoutType workoutItemIndex sessionID createdAt')
+        .lean()
 
-        res.json(activities)
+        for (let i = 0; i < activities.length; i++) {
+            activities[i].session = await fetchSession(activities[i].sessionID)
+        }
+
+        res.json({
+            activities: activities,
+            count: activitiesCount
+        })
+
     } catch (error) {
-        console.log(error)
         res.status(500).json({message: error})
     }
 })
