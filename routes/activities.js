@@ -15,7 +15,7 @@ router.get('/uid/:uid', async (req, res) => {
     async function fetchSession(sessionID) {
         try {
             const session = Session.findById(sessionID)
-            .select('title hostUID associatedClubID')
+            .select('title hostUID associatedClubID workoutItems')
             .lean()
             return session
         } catch (error) {
@@ -38,7 +38,13 @@ router.get('/uid/:uid', async (req, res) => {
         .lean()
 
         for (let i = 0; i < activities.length; i++) {
-            activities[i].session = await fetchSession(activities[i].sessionID)
+            const session = await fetchSession(activities[i].sessionID)
+            activities[i].title = session.workoutItems[activities[i].workoutItemIndex]
+
+            delete session.workoutItems
+            delete activities[i].workoutItemIndex
+
+            activities[i].session = session
         }
 
         res.json({
