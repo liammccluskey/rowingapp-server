@@ -11,7 +11,7 @@ const Session = require('../models/Session')
     - currently no query filter supported
 */
 router.get('/uid/:uid', async (req, res) => {
-    const pageSize = 15
+    const pageSize = 5
     async function fetchSession(sessionID) {
         try {
             const session = Session.findById(sessionID)
