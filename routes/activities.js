@@ -4,6 +4,23 @@ const Activity = require('../models/Activity')
 
 // PATH: /activities
 
+// GET: all a users complted activities
+/*
+    - currently no query filter supported
+*/
+router.get('/uid/:uid', async (req, res) => {
+    try {
+        const activities = await Activity.find({
+            uid: req.params.uid
+        }).lean()
+
+        res.json(activities)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({message: error})
+    }
+})
+
 
 // GET: specific activity by ID
 router.get('/:activityID', async (req,res) => {
