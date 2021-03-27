@@ -47,7 +47,6 @@ router.get('/uid/:uid', async (req, res) => {
             .lean()
             return session
         } catch (error) {
-            console.log(error)
             return {title: '', hostUID: '', associatedClubID: ''}
         }
     }
@@ -65,7 +64,7 @@ router.get('/uid/:uid', async (req, res) => {
         .sort(req.query.sortby)
         .skip( (req.query.page - 1) * pageSize)
         .limit(pageSize)
-        .select('distance elapsedTime workoutType workoutItemIndex sessionID createdAt')
+        .select('distance elapsedTime averagePace workoutType workoutItemIndex sessionID createdAt')
         .lean()
 
         for (let i = 0; i < activities.length; i++) {
