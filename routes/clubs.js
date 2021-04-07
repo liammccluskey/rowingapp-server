@@ -55,11 +55,30 @@ router.get('/search', async (req, res) => {
 })
 
 // GET: get a specific club by customURL
+/*
+    usage: full fetch, on club page
+*/
 router.get('/customURL/:customURL', async (req, res) => {
     try {
         const club = await Club.findOne({
             customURL: req.params.customURL
         })
+        .lean()
+
+        club.members =  await User.find({
+            uid: {$in: club.memberUIDs}
+        })
+        .select('displayName')
+        .sort('displayName')
+        .lean()
+
+        club.admins = await User.find({
+            uid: {$in: club.adminUIDs}
+        })
+        .select('displayName')
+        .sort('displayName')
+        .lean()
+
         res.json(club)
     } catch (error) {
         console.log(error)
@@ -68,6 +87,9 @@ router.get('/customURL/:customURL', async (req, res) => {
 })
 
 // GET: get a specific club by ID
+/*
+    - usage: minimal fetch, for use other than club page
+*/
 router.get('/:clubID', async (req, res) => {
     try {
         const club = await Club.findById(req.params.clubID)
