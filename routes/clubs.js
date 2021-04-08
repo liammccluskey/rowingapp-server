@@ -139,6 +139,22 @@ router.patch('/:clubID/join', async (req,res) => {
     }
 })
 
+router.patch('/:clubID/leave', async (req, res) => {
+    try {
+        await Club.findByIdAndUpdate(
+            req.params.clubID,
+            {$pull: { memberUIDs: req.body.uid}}
+        )
+        await User.findOneAndUpdate(
+            {uid: req.body.uid},
+            {$pull: {clubIDs: req.params.clubID}}
+        )
+        res.json({message: 'Successfully left club'})
+    } catch (error) {
+        res.json({message: 'Error leaving club'})
+    }
+})
+
 
 
  module.exports = router
