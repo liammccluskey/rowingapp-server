@@ -3,6 +3,7 @@ const router = express.Router()
 const Session = require('../models/Session')
 const User = require('../models/User')
 const Activity = require('../models/Activity')
+const Club = require('../models/Club')
 const { route } = require('./users')
 const moment = require('moment')
 
@@ -38,6 +39,7 @@ router.get('/uid/:uid', async (req, res) => {
             const club = Club.findById(clubID)
             .select('name iconURL')
             .lean()
+            return club
         } catch (error) {
             return {name: 'N/A', iconURL: ''}
         }
@@ -60,8 +62,8 @@ router.get('/uid/:uid', async (req, res) => {
 
         if (query.sparse === '0') {
             for (let i = 0; i < sessions.length; i++) {
-                if (session.associatedClubID !== 'none') {
-                    session.club = await fetchClub(session.associatedClubID)
+                if (sessions[i].associatedClubID !== 'none') {
+                    sessions[i].club = await fetchClub(sessions[i].associatedClubID)
                 }
             }
         }
