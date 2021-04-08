@@ -32,6 +32,16 @@ router.get('/uid/:uid', async (req, res) => {
     } else {
         selectedFields = 'startAt title associatedClubID hostUID'
     }
+
+    async function fetchClub(clubID) {
+        try {
+            const club = Club.findById(clubID)
+            .select('name iconURL')
+            .lean()
+        } catch (error) {
+            return {name: 'N/A', iconURL: ''}
+        }
+    }
     
     try {
         const user = await User
@@ -47,6 +57,14 @@ router.get('/uid/:uid', async (req, res) => {
         .select(selectedFields)
         .sort({startAt: 1})
         .lean()
+
+        if (!query.sparse) {
+            for (let i = 0; i < sessions.length; i++) {
+                if (session.associatedClubID !== 'none') {
+                    session.club = await fetchClub(session.associatedClubID)
+                }
+            }
+        }
 
         res.json(sessions)
 

@@ -50,6 +50,7 @@ router.get('/uid/:uid', async (req, res) => {
             return {title: '', hostUID: '', associatedClubID: ''}
         }
     }
+
     try {
         const activitiesCount = await Activity.find({
             uid: req.params.uid,
