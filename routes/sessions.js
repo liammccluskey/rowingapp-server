@@ -58,7 +58,7 @@ router.get('/uid/:uid', async (req, res) => {
         .sort({startAt: 1})
         .lean()
 
-        if (!query.sparse) {
+        if (query.sparse === '0') {
             for (let i = 0; i < sessions.length; i++) {
                 if (session.associatedClubID !== 'none') {
                     session.club = await fetchClub(session.associatedClubID)
