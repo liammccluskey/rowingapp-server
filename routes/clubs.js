@@ -68,14 +68,14 @@ router.get('/customURL/:customURL', async (req, res) => {
         club.members =  await User.find({
             uid: {$in: club.memberUIDs}
         })
-        .select('displayName')
+        .select('displayName iconURL')
         .sort('displayName')
         .lean()
 
         club.admins = await User.find({
             uid: {$in: club.adminUIDs}
         })
-        .select('displayName')
+        .select('displayName iconURL')
         .sort('displayName')
         .lean()
 
