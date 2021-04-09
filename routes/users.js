@@ -327,7 +327,22 @@ router.patch('/:uid/color-theme', async (req, res) => {
                 usesDarkMode: req.body.usesDarkMode
             }}
         )
-        res.json({message: 'color theme update sucessful'})
+        res.json({message: 'Changes saved'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+// PATH: update user iconURL
+router.patch('/:uid/iconURL', async (req, res) => {
+    try {
+        await User.findOneAndUpdate(
+            {uid: req.params.uid},
+            {$set: {
+                iconURL: req.body.iconURL
+            }}
+        )
+        res.json({message: 'Changes saved'})
     } catch (error) {
         res.status(500).json({message: error})
     }

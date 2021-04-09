@@ -11,6 +11,10 @@ const UserSchema = mongoose.Schema({
         unique: true,
         index: true
     },
+    iconURL: {
+        type: String,
+        required: false
+    },
     clubIDs: {
         type: [String],
         default: []
