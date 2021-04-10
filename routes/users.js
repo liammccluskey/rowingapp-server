@@ -3,8 +3,6 @@ const router = express.Router()
 const User = require('../models/User')
 const Activity = require('../models/Activity')
 const moment = require('moment')
-const { months } = require('moment')
-const { count } = require('../models/Activity')
 
 // PATH: /users
 

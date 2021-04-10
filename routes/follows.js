@@ -1,4 +1,4 @@
-const express = required('express')
+const express = require('express')
 const router = express.Router()
 const Follow = require('../models/Follow')
 const User = require('../models/User')
@@ -85,3 +85,5 @@ router.delete('/', async (req, res) => {
         res.status(500).json({message: error})
     }
 })
+
+module.exports = router
