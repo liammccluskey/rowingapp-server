@@ -8,23 +8,13 @@ const { count } = require('../models/Activity')
 
 // PATH: /users
 
-// GET: get a user
-router.get('/', async (req,res) => {
-    try {
-        const users = await User.find()
-        res.json(users)
-    } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
-    }
-})
-
-
+// GET: a user by uid
 router.get('/:uid', async (req, res) => {
     try {
         const user = await User.findOne({
             uid: req.params.uid
         })
+        .lean()
         res.json(user)
     } catch (error) {
         console.log(error)
@@ -32,6 +22,7 @@ router.get('/:uid', async (req, res) => {
     }
 })
 
+// GET: a users's stats (for dashboard)
 router.get('/:uid/statistics', async (req, res) => {
     // Timeframes are this (week, month, year)
     try {
@@ -310,8 +301,8 @@ router.post('/', async (req, res) =>{
         uid: req.body.uid
     })
     try {
-        const newUser = await user.save()
-        res.json(newUser)
+        await user.save()
+        res.json({message: 'Did create user'})
     } catch(error) {
         console.log(error)
         res.status(500).json({message: error})
