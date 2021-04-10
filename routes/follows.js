@@ -89,8 +89,8 @@ router.post('/', async (req, res) => {
 router.delete('/', async (req, res) => {
     try {
         await Follow.deleteOne({
-            follower: req.data.follower,
-            followee: req.data,followee
+            follower: req.query.follower,
+            followee: req.query.followee
         })
         res.json({message: 'did delete follow'})
     } catch (error) {
