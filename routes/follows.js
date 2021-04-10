@@ -59,6 +59,18 @@ router.get('/uid/:uid/followees', async (req, res) => {
     }
 })
 
+// GET: check if a user follows another user
+router.get('/uid/:followerUID/doesfollow/uid/:followeeUID', async (req, res) => {
+    try {
+        const count = await Follow.countDocuments({followee: req.params.followerUID, followee: req.params.followeeUID})
+        res.json({
+            doesFollow: count > 0 
+        })
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
 //POST: follow a user
 router.post('/', async (req, res) => {
     const follow = new Follow({
