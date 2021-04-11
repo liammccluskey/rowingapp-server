@@ -12,13 +12,12 @@ const { deleteOne } = require('../models/Club')
 router.get('/user/:userID', async (req, res) => {
     try {
         const memberships = await ClubMembership.find({user: req.params.userID})
-        .select('club')
         .lean()
+        .select('club')
         .populate('club', 'name iconURL customURL')
 
         res.json(memberships.map(membership => membership.club))
     } catch (error) {
-        console.log(error)
         res.status(500).json({message: error})
     }
 })
@@ -58,8 +57,8 @@ router.post('/', async (req, res) => {
 // DELETE: leave a club
 router.delete('/', async (req, res) => {
     try {
-        await deleteOne({user: req.query.user, club: req.query.club})
-        res.json({message: 'Did delete club'})
+        await ClubMembership.deleteOne({user: req.query.user, club: req.query.club})
+        res.json({message: 'Did leave club'})
     } catch (error) {
         res.status(500).json({message: error})
     }
