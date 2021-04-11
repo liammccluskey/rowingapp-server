@@ -6,15 +6,15 @@ const User = require('../models/User')
 // PATH: /follows
 
 // GET: a user's follow count info (follwing, followers)
-router.get('/uid/:uid/summary', async (req, res) => {
+router.get('/user/:userID/summary', async (req, res) => {
     async function fetchFollowersCount() {
         try {
-            return await Follow.countDocuments({followee: req.params.uid})
+            return await Follow.countDocuments({followee: req.params.userID})
         } catch (error) { return 0 }
     }
     async function fetchFollowingCount() {
         try {
-            return await Follow.countDocuments({follower: req.params.uid})
+            return await Follow.countDocuments({follower: req.params.userID})
         } catch (error) { return 0 }
     }
     res.json({
@@ -24,45 +24,36 @@ router.get('/uid/:uid/summary', async (req, res) => {
 })
 
 // GET: a user's followers
-router.get('/uid/:uid/followers', async (req, res) => {
+router.get('/user/:userID/followers', async (req, res) => {
     try {
-        const follows = await Follow.find({followee: req.params.uid})
+        const follows = await Follow.find({followee: req.params.userID})
         .lean()
-        const followerUIDs = follows.map(follow => follow.follower)
-        const followers = await User.find({
-            uid: { $in: followerUIDs }
-        })
-        .select('uid iconURL displayName')
-        .lean()
+        .select('follower')
+        .populate('follower', 'iconURL displayName')
 
-        res.json(followers)
+        res.json(follows.map(follow => follow.follower))
     } catch (error) {
         res.json({message: error})
     }
 })
 
 // GET: a user's followees
-router.get('/uid/:uid/followees', async (req, res) => {
+router.get('/user/:userID/followees', async (req, res) => {
     try {
-        const follows = await Follow.find({follower: req.params.uid})
+        const follows = await Follow.find({follower: req.params.userID})
         .lean()
-        const followeeUIDs = follows.map(follow => follow.followee)
-        const followees = await User.find({
-            uid: { $in: followeeUIDs }
-        })
-        .select('uid iconURL displayName')
-        .lean()
-
-        res.json(followees)
+        .select('followee')
+        .populate('followee', 'iconURL displayName')
+        res.json(follows.map(follow => follow.followee))
     } catch (error) {
         res.json({message: error})
     }
 })
 
 // GET: check if a user follows another user
-router.get('/uid/:followerUID/doesfollow/uid/:followeeUID', async (req, res) => {
+router.get('/doesfollow', async (req, res) => {
     try {
-        const count = await Follow.countDocuments({followee: req.params.followerUID, followee: req.params.followeeUID})
+        const count = await Follow.countDocuments({followee: req.query.follower, followee: req.query.followee})
         res.json({
             doesFollow: count > 0 
         })
