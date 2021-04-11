@@ -50,6 +50,7 @@ router.post('/', async (req, res) => {
         await membership.save()
         res.json({message: 'Did join club'})
     } catch (error) {
+        console.log(error)
         res.status(500).json({message: error})
     }
 })
