@@ -33,7 +33,7 @@ router.get('/club/:clubID', async (req, res) => {
         const memberships = await ClubMembership.find({club: req.params.clubID})
         .select('user role')
         .lean()
-        .populate('user', 'displayName iconURL')
+        .populate('user', 'displayName iconURL uid')
         res.json(memberships.map(membership => ( {...membership.user, role: membership.role} ) ))
     } catch (error) {
         res.status(500).json({message: error})
