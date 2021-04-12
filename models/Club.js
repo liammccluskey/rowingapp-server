@@ -5,14 +5,6 @@ const ClubSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    adminUIDs: {
-        type: [String],
-        required: true,
-    },
-    memberUIDs: {
-        type: [String],
-        required: true
-    },
     customURL: { // app.com/clubs/customURL
         type: String,
         required: true,
@@ -25,6 +17,11 @@ const ClubSchema = mongoose.Schema({
     iconURL: {
         type: String,
         required: true
+    },
+    bannerURL: {
+        type: String,
+        required: false,
+        default: null
     }
 }, {timestamps: true} )
 

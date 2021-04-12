@@ -93,7 +93,8 @@ router.post('/', async (req, res) => {
         name: req.body.name,
         customURL: req.body.customURL,
         description: req.body.description,
-        iconURL: req.body.iconURL
+        iconURL: req.body.iconURL,
+        bannerURL: req.body.bannerURL
     })
     try {
         await club.save()

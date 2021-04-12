@@ -13,11 +13,8 @@ const UserSchema = mongoose.Schema({
     },
     iconURL: {
         type: String,
-        required: false
-    },
-    clubIDs: {
-        type: [String],
-        default: []
+        required: false,
+        default: null
     },
     usesDarkMode: {
         type: Boolean,
