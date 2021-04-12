@@ -34,7 +34,7 @@ router.get('/user/:userID', async (req, res) => {
 
         const sessions = query.sparse === '1' ? 
             await Session.find({
-                startAt: {$gte: startDate, $lte},
+                startAt: {$gte: startDate, $lte: endDate},
                 $or: [
                     {hostUser: req.params.userID},
                     {club: {$in: memberships.map(m => m.club)}}
@@ -45,7 +45,7 @@ router.get('/user/:userID', async (req, res) => {
             .lean()
             :
             await Session.find({
-                startAt: {$gte: startDate, $lte},
+                startAt: {$gte: startDate, $lte: endDate},
                 $or: [
                     {hostUser: req.params.userID},
                     {club: {$in: memberships.map(m => m.club)}}
