@@ -5,25 +5,7 @@ const Session = require('../models/Session')
 
 // PATH: /activities
 
-router.get('/test', async (req, res) => {
-    const reservedKeys = ['page', 'pagesize', 'sortby']
-    const filterQuery = Object.fromEntries(
-        Object.entries(req.query).filter(e => 
-            !reservedKeys.includes(e[0])
-        )
-    )
-
-    try {
-        const activities = await Activity.find(filterQuery)
-        .sort(req.query.sortby)
-
-        res.json(activities)
-    } catch (error) {
-        res.status(500).json({message: error})
-    }
-})
-
-// GET: all a users complted activities
+// GET: all a users completed activities
 /*
     - results are paginated
     - supported sort filters:
@@ -31,7 +13,7 @@ router.get('/test', async (req, res) => {
     - supported query filters:
         - distance (<, =, >), time (<,=,>), workoutType (=)
 */
-router.get('/uid/:uid', async (req, res) => {
+router.get('/search', async (req, res) => {
     const pageSize = Math.min(50, req.query.pagesize)
 
     const reservedKeys = ['page', 'pagesize', 'sortby']
@@ -40,43 +22,17 @@ router.get('/uid/:uid', async (req, res) => {
             !reservedKeys.includes(e[0])
         )
     )
-    async function fetchSession(sessionID) {
-        try {
-            const session = Session.findById(sessionID)
-            .select('title hostUID associatedClubID workoutItems')
-            .lean()
-            return session
-        } catch (error) {
-            return {title: '', hostUID: '', associatedClubID: ''}
-        }
-    }
 
     try {
-        const activitiesCount = await Activity.find({
-            uid: req.params.uid,
-            ...filterQuery
-        })
-        .countDocuments()
 
-        const activities = await Activity.find({
-            uid: req.params.uid,
-            ...filterQuery
-        })
+        const activitiesCount = await Activity.countDocuments(filterQuery)
+        const activities = await Activity.find(filterQuery)
         .sort(req.query.sortby)
         .skip( (req.query.page - 1) * pageSize)
         .limit(pageSize)
-        .select('distance elapsedTime averagePace workoutType workoutItemIndex sessionID createdAt')
+        .select('distance elapsedTime averagePace workoutType workoutItemIndex createdAt')
         .lean()
-
-        for (let i = 0; i < activities.length; i++) {
-            const session = await fetchSession(activities[i].sessionID)
-            activities[i].title = session.workoutItems[activities[i].workoutItemIndex]
-
-            delete session.workoutItems
-            delete activities[i].workoutItemIndex
-
-            activities[i].session = session
-        }
+        .populate('session', 'title workoutItems')
 
         res.json({
             activities: activities,
@@ -102,14 +58,13 @@ router.get('/:activityID', async (req,res) => {
 // POST: Create an activity
 router.post('/', async (req,res) => {
     const activity = new Activity({
-        uid: req.body.uid,
-        name: req.body.name,
+        user: req.body.user,
         workoutItemIndex: req.body.workoutItemIndex,
-        sessionID: req.body.sessionID
+        session: req.body.session
     })
     try {
-        const savedActivity = await activity.save()
-        res.json(savedActivity)
+        await activity.save()
+        res.json({message: 'Did create activity'})
     } catch(error) {
         res.status(500).json({message: error})
     }
@@ -121,11 +76,13 @@ router.post('/', async (req,res) => {
 */
 router.patch('/:activityID', async (req,res) => {
     delete req.body._id
+    delete req.body.user
+    delete req.body.session
     try {
         const updatedActivity = await Activity.findByIdAndUpdate(req.params.activityID, {
             $set: req.body
         })
-        res.json({message: 'your activity was updated successfully'})
+        res.json({message: 'Did update activity'})
     } catch (error) {
         res.status(500).json({message: error})
     }
@@ -136,7 +93,7 @@ router.patch('/:activityID/complete', async (req, res) => {
         await Activity.findByIdAndUpdate(req.params.activityID, {
             $set: {isCompleted: true}
         })
-        res.json({message: 'your request to finish this activity was successful'})
+        res.json({message: 'Did complete activity'})
     } catch (error) {
         res.status(500).json({message: error})
     }

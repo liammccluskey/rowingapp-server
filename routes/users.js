@@ -6,12 +6,21 @@ const moment = require('moment')
 
 // PATH: /users
 
-// GET: a user by uid
-router.get('/:uid', async (req, res) => {
+// GET: a user's id on login
+router.get('/uid/:uid', async (req, res) => {
     try {
-        const user = await User.findOne({
-            uid: req.params.uid
-        })
+        const user = await User.findOne({uid: req.params.uid})
+        .lean()
+        res.json(user)
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+// GET: a user by uid
+router.get('/:userID', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userID)
         .lean()
         res.json(user)
     } catch (error) {
@@ -21,19 +30,19 @@ router.get('/:uid', async (req, res) => {
 })
 
 // GET: a users's stats (for dashboard)
-router.get('/:uid/statistics', async (req, res) => {
+router.get('/:userID/statistics', async (req, res) => {
     // Timeframes are this (week, month, year)
     try {
         const weekActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: moment().startOf('week').startOf('day').toDate() } 
         })
         const monthActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: moment().startOf('month').startOf('day').toDate() } 
         })
         const yearActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: moment().startOf('year').startOf('month').toDate() } 
         })
 
@@ -76,7 +85,7 @@ router.get('/:uid/statistics', async (req, res) => {
     }
 })
 
-router.get('/:uid/statistics-general', async (req, res) => {
+router.get('/:userID/statistics-general', async (req, res) => {
     // Timeframes are past (week, month, year)
     const weekStart = moment().subtract(1, 'week').startOf('day')
     const monthStart = moment().subtract(1, 'month').startOf('day')
@@ -85,29 +94,29 @@ router.get('/:uid/statistics-general', async (req, res) => {
     try {
         // past timeframes
         const weekActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: weekStart.clone().toDate() } 
         }).lean()
         const monthActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: monthStart.clone().toDate() } 
         }).lean()
         const yearActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: yearStart.clone().toDate() } 
         }).lean()
 
         // past past timeframes
         const prevWeekActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: weekStart.clone().subtract(1, 'week').toDate(), $lte: weekStart.clone().toDate() } 
         }).lean()
         const prevMonthActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: monthStart.clone().subtract(1, 'month').toDate(), $lte: monthStart.clone().toDate() } 
         }).lean()
         const prevYearActivities = await Activity.find({
-            uid: req.params.uid,
+            userID: req.params.userID,
             createdAt: {$gte: yearStart.clone().subtract(1, 'year').toDate(), $lte: yearStart.clone().toDate() } 
         }).lean()
 
@@ -214,7 +223,7 @@ router.get('/:uid/statistics-general', async (req, res) => {
 /*
     NOTE: currently only supports pace data
 */
-router.get('/:uid/statistics-progress', async (req, res) => {
+router.get('/:userID/statistics-progress', async (req, res) => {
     const startDates = [
         moment().subtract(1, 'week').startOf('day'),    // week
         moment().subtract(1, 'month').startOf('day'),   // month
@@ -246,7 +255,7 @@ router.get('/:uid/statistics-progress', async (req, res) => {
     try {
         const queries = startDates.map(startDate => (
             {
-                uid: req.params.uid,
+                userID: req.params.userID,
                 createdAt: { $gte: startDate.toDate() },
                 workoutType: { $gte: 0, $lte: 5},
                 distance: { $gte: req.query.gte, $lte: req.query.lte }
@@ -296,7 +305,8 @@ router.post('/', async (req, res) =>{
     // check if user exists
     const user = new User({
         displayName: req.body.displayName,
-        uid: req.body.uid
+        uid: req.body.uid,
+        iconURL: req.body.iconURL
     })
     try {
         await user.save()
@@ -308,7 +318,7 @@ router.post('/', async (req, res) =>{
 })
 
 // PATCH: update user color pref
-router.patch('/:uid/color-theme', async (req, res) => {
+router.patch('/:userID/color-theme', async (req, res) => {
     try {
         await User.findOneAndUpdate(
             {uid: req.params.uid},
@@ -323,15 +333,26 @@ router.patch('/:uid/color-theme', async (req, res) => {
 })
 
 // PATH: update user iconURL
-router.patch('/:uid/iconURL', async (req, res) => {
+router.patch('/:userID/iconURL', async (req, res) => {
     try {
-        await User.findOneAndUpdate(
-            {uid: req.params.uid},
-            {$set: {
+        await User.findByIdAndUpdate(req.params.userID, {
+            $set: {
                 iconURL: req.body.iconURL
-            }}
-        )
+            }
+        })
         res.json({message: 'Changes saved'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+router.patch('/:userID/displayName', async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.params.userID,{
+            $set: {
+                displayName: req.body.displayName
+            }
+        })
     } catch (error) {
         res.status(500).json({message: error})
     }

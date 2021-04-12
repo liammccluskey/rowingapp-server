@@ -4,6 +4,7 @@ const ClubMembership = require('../models/ClubMembership')
 const Club = require('../models/Club')
 const User = require('../models/User')
 const { deleteOne } = require('../models/Club')
+const { route } = require('./clubs')
 
 // GET : clubs a user belongs to
 /*
@@ -34,6 +35,23 @@ router.get('/club/:clubID', async (req, res) => {
         .lean()
         .populate('user', 'displayName iconURL uid')
         res.json(memberships.map(membership => ( {...membership.user, role: membership.role} ) ))
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+// GET: get a user's role in a club
+router.get('/ismember', async (req, res) => {
+    try {
+        const membership = await ClubMembership.findOne({
+            user: req.query.user, club: req.query.club
+        }).lean()
+        .select('role')
+
+        res.json({
+            isMember: !!membership,
+            role: membership ? membership.role : -1
+        })
     } catch (error) {
         res.status(500).json({message: error})
     }

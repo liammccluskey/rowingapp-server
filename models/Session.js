@@ -5,35 +5,28 @@ const SessionSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    hostName: {
-        type: String,
-        required: true
-    },
-    hostUID: {
+    hostUser: {
         type: String,
         required: true,
-        index: true
+        index: true,
+        ref: 'User'
     },
+    club: {
+        type: String,
+        index: true,
+        ref: 'Club'
+    },
+    members: [{
+        type: String,
+        ref: 'User'
+    }],
     startAt: {
         type: Date,
         required: true
     },
-    isAccessibleByLink: {
-        type: Boolean,
-        required: true
-    },
-    associatedClubID: {
-        type: String,
-        required: true,
-        index: true
-    },
     workoutItems: {   // Text description of each workout item (ex. : 2k 2 warmup, 10k SS, etc.)
         type: [String],
         required: true
-    },
-    memberUIDs: {
-        type: [String],
-        default: []
     },
     isCompleted: {
         type: Boolean,

@@ -1,23 +1,21 @@
 const mongoose = require('mongoose')
 
 const ActivitySchema = mongoose.Schema({
-    uid: {
+    user: {
         type: String,
         required: true,
-        index: true
-    },
-    name: { // user's name
-        type: String,
-        required: true
+        index: true,
+        ref: 'User'
     },
     workoutItemIndex: {
         type: Number,
         required: true
     },
-    sessionID: {
+    session: {
         type: String,
         requried: true,
-        index: true
+        index: true,
+        ref: 'Session'
     },
     currentPace:{
         type: Number,

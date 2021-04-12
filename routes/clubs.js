@@ -30,19 +30,21 @@ router.get('/uid/:uid', async (req, res) => {
     required field: page
 */
 router.get('/search', async (req, res) => {
-    const pageSize = 15
+    const pageSize = Math.min(50, req.query.pagesize)
+
     const query = {
         $text: {
             $search : req.query.name
         }
     }
+
     try {
-        const count = await Club.find(query).countDocuments()
+        const count = await Club.countDocuments(query)
 
         const clubs = await Club.find(query)
-            .skip((req.query.page - 1)*pageSize)
-            .limit(pageSize)
-            .lean()
+        .skip((req.query.page - 1)*pageSize)
+        .limit(pageSize)
+        .lean()
 
         res.json({
             clubs: clubs,
@@ -65,37 +67,22 @@ router.get('/customURL/:customURL', async (req, res) => {
         })
         .lean()
 
-        club.members =  await User.find({
-            uid: {$in: club.memberUIDs}
-        })
-        .select('displayName iconURL uid')
-        .sort('displayName')
-        .lean()
-
-        club.admins = await User.find({
-            uid: {$in: club.adminUIDs}
-        })
-        .select('displayName iconURL uid')
-        .sort('displayName')
-        .lean()
-
         res.json(club)
     } catch (error) {
-        console.log(error)
         res.status(500).json({message: error})
     }
 })
 
 // GET: get a specific club by ID
 /*
-    - usage: minimal fetch, for use other than club page
+    - usage: for use other than club page
 */
 router.get('/:clubID', async (req, res) => {
     try {
         const club = await Club.findById(req.params.clubID)
+        .lean()
         res.json(club)
     } catch (error) {
-        console.log(error)
         res.status(500).json({message: error})
     }
 })
@@ -104,58 +91,17 @@ router.get('/:clubID', async (req, res) => {
 router.post('/', async (req, res) => {
     const club = new Club({
         name: req.body.name,
-        memberUIDs: [req.body.uid],
-        adminUIDs: [req.body.uid],
         customURL: req.body.customURL,
         description: req.body.description,
         iconURL: req.body.iconURL
     })
     try {
-        const savedClub = await club.save()
-        await User.findOneAndUpdate(
-            {uid: req.body.uid},
-            {$addToSet: {clubIDs: req.params.clubID}}
-        )
-        res.json(savedClub)
+        await club.save()
+        res.json({message: 'did create club'})
     } catch (error) {
         res.json({message: error})
-        console.log(error)
     }
 })
-
-router.patch('/:clubID/join', async (req,res) => {
-    try {
-        const updatedClub = await Club.findByIdAndUpdate(req.params.clubID, 
-            {$addToSet: {memberUIDs: req.body.uid}}
-        )
-        await User.findOneAndUpdate(
-            {uid: req.body.uid},
-            {$addToSet: {clubIDs: req.params.clubID}}
-        )
-        res.json(updatedClub)
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({message: error})
-    }
-})
-
-router.patch('/:clubID/leave', async (req, res) => {
-    try {
-        await Club.findByIdAndUpdate(
-            req.params.clubID,
-            {$pull: { memberUIDs: req.body.uid}}
-        )
-        await User.findOneAndUpdate(
-            {uid: req.body.uid},
-            {$pull: {clubIDs: req.params.clubID}}
-        )
-        res.json({message: 'Successfully left club'})
-    } catch (error) {
-        res.json({message: 'Error leaving club'})
-    }
-})
-
-
 
  module.exports = router
 

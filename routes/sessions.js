@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Session = require('../models/Session')
 const User = require('../models/User')
+const ClubMembership = require('../models/ClubMembership')
 const Activity = require('../models/Activity')
 const Club = require('../models/Club')
 const { route } = require('./users')
@@ -13,9 +14,8 @@ const moment = require('moment')
 /*
     if req.query.sparse === 1 -> only send minimal (for calendar)
 */
-router.get('/uid/:uid', async (req, res) => {
+router.get('/user/:userID', async (req, res) => {
     const query = req.query
-
     let startDate
     let endDate
 
@@ -26,47 +26,35 @@ router.get('/uid/:uid', async (req, res) => {
         startDate = moment([query.year, query.month]).startOf('month').toDate()
         endDate = moment([query.year, query.month]).endOf('month').toDate()
     }
-    
-    let selectedFields
-    if (query.sparse === '1') {
-        selectedFields = 'startAt title'
-    } else {
-        selectedFields = 'startAt title associatedClubID hostUID'
-    }
-
-    async function fetchClub(clubID) {
-        try {
-            const club = Club.findById(clubID)
-            .select('name iconURL')
-            .lean()
-            return club
-        } catch (error) {
-            return {name: 'N/A', iconURL: ''}
-        }
-    }
-    
+ 
     try {
-        const user = await User
-            .findOne({uid: req.params.uid})
-            .select('clubIDs')
-        const sessions = await Session.find({
-            startAt: {$gte: startDate, $lte: endDate},
-            $or: [
-                {hostUID: req.params.uid},
-                {associatedClubID: {$in: user.clubIDs}}
-            ]
-        })
-        .select(selectedFields)
-        .sort({startAt: 1})
+        const memberships = await ClubMembership.find({user: req.params.userID})
         .lean()
+        .select('club -_id')
 
-        if (query.sparse === '0') {
-            for (let i = 0; i < sessions.length; i++) {
-                if (sessions[i].associatedClubID !== 'none') {
-                    sessions[i].club = await fetchClub(sessions[i].associatedClubID)
-                }
-            }
-        }
+        const sessions = query.sparse === '1' ? 
+            await Session.find({
+                startAt: {$gte: startDate, $lte},
+                $or: [
+                    {hostUser: req.params.userID},
+                    {club: {$in: memberships.map(m => m.club)}}
+                ]
+            })
+            .select('startAt title')
+            .sort('startAt')
+            .lean()
+            :
+            await Session.find({
+                startAt: {$gte: startDate, $lte},
+                $or: [
+                    {hostUser: req.params.userID},
+                    {club: {$in: memberships.map(m => m.club)}}
+                ]
+            })
+            .sort('startAt')
+            .lean()
+            .populate('club', 'name iconURL')
+            .populate('hostUser', 'displayName iconURL')
 
         res.json(sessions)
 
@@ -77,23 +65,14 @@ router.get('/uid/:uid', async (req, res) => {
 
 })
 
-// GET: all sessions
-router.get('/', async (req,res) => {
-    try {
-        const sessions = await Session.find()
-        res.json(sessions)
-    } catch (err) {
-        res.status(500).json({message: err})
-    }
-})
-
-// GET: specific session 
-/*
-    USE CASE: shallow display of session (only near static info needed)
-*/
+// GET: specific session
 router.get('/:sessionID', async (req,res) => {
     try {
         const session = await Session.findById(req.params.sessionID)
+        .lean()
+        .populate('club', 'name iconURL')
+        .populate('hostUser', 'displayName iconURL')
+        .populate('members', 'displayName iconURL')
         res.json(session)
     } catch (err) {
         res.status(500).json({message: err})
@@ -106,10 +85,11 @@ router.get('/:sessionID', async (req,res) => {
 */
 router.get('/:sessionID/activities', async (req, res) => {
     try {
-        const session = await Session.findById(req.params.sessionID).select('workoutItems')
-        const activities = await Activity.find({
-            sessionID: req.params.sessionID
-        })
+        const session = await Session.findById(req.params.sessionID)
+        .select('workoutItems')
+        .lean()
+        const activities = await Activity.find({session: req.params.sessionID})
+        .lean()
         res.json(
             session.workoutItems.map((item, i) => (
                 activities.filter(ac => ac.workoutItemIndex === i)
@@ -120,42 +100,19 @@ router.get('/:sessionID/activities', async (req, res) => {
     }
 })
 
-// GET: all users from a session
-/*
-    USE CASE: Display names (and icon?) of all members of a session
-*/
-router.get('/:sessionID/members', async (req, res) => {
-    try {
-        const session = await Session.findById(req.params.sessionID).select('memberUIDs')
-        if (!session.memberUIDs.length) {
-            res.json([])
-            return 
-        }
-        const members = await User.find({
-            uid: {
-                $in: session.memberUIDs
-            }
-        }).select('displayName')
-        res.json(members)
-    } catch (error) {
-        res.status(500).json({message: error})
-    }
-})
-
 // POST: create new session
 router.post('/', async (req,res) => {
     const session = new Session({
         title: req.body.title,
-        hostName: req.body.hostName,
-        hostUID: req.body.hostUID,
+        hostUser: req.body.hostUser,
         startAt: req.body.startAt,
         isAccessibleByLink: req.body.isAccessibleByLink,
-        associatedClubID: req.body.associatedClubID,
+        club: req.body.club,
         workoutItems: req.body.workoutItems
     })
     try {
-        const savedSession = await session.save()
-        res.json(session)
+        await session.save()
+        res.json({message: 'Did create session'})
     } catch (err) {
         res.status(500).json({message: err})
     }
@@ -166,10 +123,10 @@ router.patch('/:sessionID/join', async (req, res) => {
     try {
         await Session.findByIdAndUpdate(req.params.sessionID, {
             $addToSet: {
-                memberUIDs: req.body.uid
+                members: req.body.user
             }
         })
-        res.json({message: 'Your request to join this session was succesful'})
+        res.json({message: 'Did join session'})
     } catch(error) {
         res.status(500).json({message: error})
     }
