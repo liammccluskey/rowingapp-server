@@ -97,8 +97,8 @@ router.post('/', async (req, res) => {
         bannerURL: req.body.bannerURL
     })
     try {
-        await club.save()
-        res.json({message: 'did create club'})
+        const club = await club.save()
+        res.json(club)
     } catch (error) {
         res.json({message: error})
     }
