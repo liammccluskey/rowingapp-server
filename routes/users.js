@@ -352,6 +352,7 @@ router.patch('/:userID/displayName', async (req, res) => {
                 displayName: req.body.displayName
             }
         })
+        res.json({message: 'Changes Saved'})
     } catch (error) {
         res.status(500).json({message: error})
     }
