@@ -21,7 +21,7 @@ const ClubSchema = mongoose.Schema({
     bannerURL: {
         type: String,
         required: false,
-        default: null
+        default: undefined
     }
 }, {timestamps: true} )
 
