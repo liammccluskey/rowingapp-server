@@ -16,6 +16,11 @@ const UserSchema = mongoose.Schema({
         required: false,
         default: null
     },
+    bannerURL: {
+        type: String,
+        required: false,
+        default: null
+    },
     usesDarkMode: {
         type: Boolean,
         default: false

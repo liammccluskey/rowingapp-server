@@ -331,7 +331,7 @@ router.patch('/:userID/color-theme', async (req, res) => {
     }
 })
 
-// PATH: update user iconURL
+// PATCH: Profile updates
 router.patch('/:userID/iconURL', async (req, res) => {
     try {
         await User.findByIdAndUpdate(req.params.userID, {
@@ -352,7 +352,20 @@ router.patch('/:userID/displayName', async (req, res) => {
                 displayName: req.body.displayName
             }
         })
-        res.json({message: 'Changes Saved'})
+        res.json({message: 'Changes saved'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+router.patch('/:userID/bannerURL', async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.params.userID, {
+            $set: {
+                bannerURL: req.body.bannerURL
+            }
+        })
+        res.json({message: 'Changes saved'})
     } catch (error) {
         res.status(500).json({message: error})
     }
