@@ -104,6 +104,16 @@ router.post('/', async (req, res) => {
     }
 })
 
+// GET: check if customURL is available
+router.post('/isavailable', async (req, res) => {
+    try {
+        const count = await Club.countDocuments({customURL: req.query.customURL})
+        res.json({isAvailable: count === 0})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
  module.exports = router
 
  
