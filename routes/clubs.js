@@ -6,6 +6,17 @@ const User = require('../models/User')
 
 // PATH: /clubs
 
+// GET: check if customURL is available
+router.get('/isavailable', async (req, res) => {
+    try {
+        const count = await Club.countDocuments({customURL: req.query.customURL})
+        res.json({isAvailable: count === 0})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({message: error})
+    }
+})
+
 // GET: clubs a user belongs to
 router.get('/uid/:uid', async (req, res) => {
     try {
@@ -101,16 +112,6 @@ router.post('/', async (req, res) => {
         res.json({_id: club._id})
     } catch (error) {
         res.json({message: error})
-    }
-})
-
-// GET: check if customURL is available
-router.get('/isavailable', async (req, res) => {
-    try {
-        const count = await Club.countDocuments({customURL: req.query.customURL})
-        res.json({isAvailable: count === 0})
-    } catch (error) {
-        res.status(500).json({message: error})
     }
 })
 
