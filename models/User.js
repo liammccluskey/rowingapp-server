@@ -27,4 +27,7 @@ const UserSchema = mongoose.Schema({
     }
 }, {timestamps: true})
 
+// Make this compound when user model is more filled out ?
+UserSchema.index({displayName: 'text'}, {weights: {displayName: 1}})
+
 module.exports = mongoose.model('User', UserSchema)

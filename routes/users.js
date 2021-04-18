@@ -17,6 +17,37 @@ router.get('/uid/:uid', async (req, res) => {
     }
 })
 
+// GET: search for a user
+/*
+    supported fields: displayName
+    required field: page, pagesize
+*/
+router.get('/search', async (req, res) => {
+    const pageSize = Math.min(50, req.query.pagesize)
+
+    const query = {
+        $text: {
+            $search : req.query.displayName
+        }
+    }
+
+    try {
+        const count = await User.countDocuments(query)
+        const users = await User.find(query)
+        .skip((req.query.page - 1)*pageSize)
+        .limit(pageSize)
+        .select('displayName iconURL')
+        .lean()
+
+        res.json({
+            users: users,
+            count: count
+        })
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
 // GET: a user by uid
 router.get('/:userID', async (req, res) => {
     try {
@@ -24,7 +55,6 @@ router.get('/:userID', async (req, res) => {
         .lean()
         res.json(user)
     } catch (error) {
-        console.log(error)
         res.status(500).json({message: error})
     }
 })
