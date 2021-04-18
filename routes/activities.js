@@ -30,7 +30,6 @@ router.get('/search', async (req, res) => {
         .sort(req.query.sortby)
         .skip( (req.query.page - 1) * pageSize)
         .limit(pageSize)
-        .select('distance elapsedTime averagePace workoutType workoutItemIndex createdAt')
         .lean()
         .populate('session', 'title workoutItems')
 
