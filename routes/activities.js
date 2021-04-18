@@ -32,6 +32,7 @@ router.get('/search', async (req, res) => {
         .limit(pageSize)
         .lean()
         .populate('session', 'title workoutItems')
+        .populate('user', 'displayName iconURL')
 
         res.json({
             activities: activities,
