@@ -89,6 +89,7 @@ router.get('/:sessionID/activities', async (req, res) => {
         .select('workoutItems')
         .lean()
         const activities = await Activity.find({session: req.params.sessionID})
+        .populate('user', 'displayName iconURL')
         .lean()
         res.json(
             session.workoutItems.map((item, i) => (
