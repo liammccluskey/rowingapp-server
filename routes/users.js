@@ -64,15 +64,15 @@ router.get('/:userID/statistics', async (req, res) => {
     // Timeframes are this (week, month, year)
     try {
         const weekActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: moment().startOf('week').startOf('day').toDate() } 
         })
         const monthActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: moment().startOf('month').startOf('day').toDate() } 
         })
         const yearActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: moment().startOf('year').startOf('month').toDate() } 
         })
 
