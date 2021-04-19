@@ -9,7 +9,7 @@ router.get('/parent/:parentID', async (req, res) => {
     try {
         const comments = await Comment.find({parent: req.params.parentID})
         .lean()
-        .sort('-createdAt')
+        .sort('createdAt')
         .populate('user', 'displayName iconURL')
 
         res.json(comments)
@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
     const comment = new Comment({
         user: req.body.user,
         parent: req.body.parent,
-        body: req.body.message
+        message: req.body.message
     })
     try {
         const comment = await comment.save()
