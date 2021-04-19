@@ -26,9 +26,10 @@ router.post('/', async (req, res) => {
         message: req.body.message
     })
     try {
-        const comment = await comment.save()
+        await comment.save()
         res.json({message: 'Comment saved'})
     } catch (error) {
+        console.log(error)
         res.status(500).json({message: error})
     }
 })
