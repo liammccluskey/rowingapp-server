@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
 // DELETE: unlike a post
 router.delete('/', async (req, res) => {
     try {
-        await Like.deleteOne({_id: req.query.like, user: req.query.user})
+        await Like.deleteOne({parent: req.query.parent, user: req.query.user})
         res.json({message: 'Comment deleted'})
     } catch (error) {
         res.status(500).json({message: error})

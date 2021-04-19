@@ -36,12 +36,7 @@ router.post('/', async (req, res) => {
 // DELETE: delete a comment
 router.delete('/', async (req, res) => {
     try {
-        const comment = await Comment.findById(req.query.comment).lean()
-        if (comment.user !== req.query.user) {
-            res.status(500).json({message: 'You do not have permission to delete this comment'})
-            return
-        }
-        await Comment.deleteOne({_id: req.query.comment})
+        await Comment.deleteOne({_id: req.query.comment, user: req.query.user})
         res.json({message: 'Comment deleted'})
     } catch (error) {
         res.status(500).json({message: error})
