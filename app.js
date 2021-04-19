@@ -32,6 +32,12 @@ app.use('/follows', followsRoute)
 const clubMembershipsRoute = require('./routes/clubmemberships')
 app.use('/clubmemberships', clubMembershipsRoute)
 
+const commentsRoute = require('./routes/comments')
+app.use('/comments', commentsRoute)
+
+const likesRoute = require('./routes/likes')
+app.use('/likes', likesRoute)
+
 mongoose.connect(process.env.DB_CONNECTION ,{ 
     useNewUrlParser: true, 
     useUnifiedTopology: true,
