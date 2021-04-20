@@ -124,29 +124,29 @@ router.get('/:userID/statistics-general', async (req, res) => {
     try {
         // past timeframes
         const weekActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: weekStart.clone().toDate() } 
         }).lean()
         const monthActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: monthStart.clone().toDate() } 
         }).lean()
         const yearActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: yearStart.clone().toDate() } 
         }).lean()
 
         // past past timeframes
         const prevWeekActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: weekStart.clone().subtract(1, 'week').toDate(), $lte: weekStart.clone().toDate() } 
         }).lean()
         const prevMonthActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: monthStart.clone().subtract(1, 'month').toDate(), $lte: monthStart.clone().toDate() } 
         }).lean()
         const prevYearActivities = await Activity.find({
-            userID: req.params.userID,
+            user: req.params.userID,
             createdAt: {$gte: yearStart.clone().subtract(1, 'year').toDate(), $lte: yearStart.clone().toDate() } 
         }).lean()
 
@@ -285,7 +285,7 @@ router.get('/:userID/statistics-progress', async (req, res) => {
     try {
         const queries = startDates.map(startDate => (
             {
-                userID: req.params.userID,
+                user: req.params.userID,
                 createdAt: { $gte: startDate.toDate() },
                 workoutType: { $gte: 0, $lte: 5},
                 distance: { $gte: req.query.gte, $lte: req.query.lte }
