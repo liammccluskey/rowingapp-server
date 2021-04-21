@@ -79,6 +79,26 @@ router.get('/:sessionID', async (req,res) => {
     }
 })
 
+// GET: sessions for club feed
+router.get('/feed/club/:clubID', async (req, res) => {
+    const endTime = moment(req.query.current_time)
+    const startTime = start.clone().subtract(1, 'month')
+    try {
+        const sessions = await Session.find({
+            club: req.params.club,
+            startAt: {$gte: startTime.toDate(), $lte: endTime.toDate()}
+        })
+        .lean()
+        .sort('-startAt')
+        .limit(30)
+        .populate('club', 'name iconURL')
+
+        res.json(sessions)
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
 // GET: activites data from session
 /*
     USE CASE: full display of session members' activity (all member activity)
