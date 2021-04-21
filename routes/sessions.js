@@ -65,20 +65,6 @@ router.get('/user/:userID', async (req, res) => {
 
 })
 
-// GET: specific session
-router.get('/:sessionID', async (req,res) => {
-    try {
-        const session = await Session.findById(req.params.sessionID)
-        .lean()
-        .populate('club', 'name iconURL')
-        .populate('hostUser', 'displayName iconURL')
-        .populate('members', 'displayName iconURL')
-        res.json(session)
-    } catch (err) {
-        res.status(500).json({message: err})
-    }
-})
-
 // GET: sessions for club feed
 router.get('/feed/club/:clubID', async (req, res) => {
     const endTime = moment()
@@ -98,6 +84,22 @@ router.get('/feed/club/:clubID', async (req, res) => {
         res.status(500).json({message: error})
     }
 })
+
+// GET: specific session
+router.get('/:sessionID', async (req,res) => {
+    try {
+        const session = await Session.findById(req.params.sessionID)
+        .lean()
+        .populate('club', 'name iconURL')
+        .populate('hostUser', 'displayName iconURL')
+        .populate('members', 'displayName iconURL')
+        res.json(session)
+    } catch (err) {
+        res.status(500).json({message: err})
+    }
+})
+
+
 
 // GET: activites data from session
 /*
