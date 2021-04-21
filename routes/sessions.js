@@ -81,7 +81,7 @@ router.get('/:sessionID', async (req,res) => {
 
 // GET: sessions for club feed
 router.get('/feed/club/:clubID', async (req, res) => {
-    const endTime = moment(req.query.current_time)
+    const endTime = moment()
     const startTime = start.clone().subtract(1, 'month')
     try {
         const sessions = await Session.find({
