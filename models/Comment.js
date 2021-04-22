@@ -17,7 +17,13 @@ const CommentSchema = mongoose.Schema({
     message: {
         type: String,
         required: true
-    }
+    },
+    replies: [
+        {
+            type: String,
+            ref: 'Comment'
+        }
+    ]
 }, {timestamps: true})
 
 module.exports = mongoose.model('Comment', CommentSchema)

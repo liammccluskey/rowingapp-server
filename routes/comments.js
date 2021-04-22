@@ -18,6 +18,43 @@ router.get('/parent/:parentID', async (req, res) => {
     }   
 })
 
+// POST: reply to a comment
+router.post('/reply', async (req, res) => {
+    const reply = new Comment({
+        user: req.body.user,
+        parent: req.body.parent,
+        message: req.body.message
+    })
+    try {
+        await comment.save()
+        await Comment.findOneAndUpdate(
+            {_id: req.body.parent},
+            {replies: {
+                $addtoSet: reply._id
+            }}
+        )
+        res.json({message: 'Reply saved'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+// DELETE: delete a reply to a comment
+router.post('/reply', async (req, res) => {
+    try {
+        await Comment.findByIdAndDelete(req.query.comment)
+        await Comment.findOneAndUpdate(
+            {_id: req.query.parent},
+            {replies: {
+                $pull: req.query.comment
+            }}
+        )
+        res.json({message: 'Reply deleted'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
 // POST: comment on a post
 router.post('/', async (req, res) => {
     const comment = new Comment({
