@@ -36,28 +36,25 @@ router.post('/reply', async (req, res) => {
         message: req.body.message
     })
     try {
-        await comment.save()
+        await reply.save()
         await Comment.findOneAndUpdate(
             {_id: req.body.parent},
-            {replies: {
-                $addtoSet: reply._id
-            }}
+            {$addToSet: {replies: reply._id}}
         )
         res.json({message: 'Reply saved'})
     } catch (error) {
+        console.log(error)
         res.status(500).json({message: error})
     }
 })
 
 // DELETE: delete a reply to a comment
-router.post('/reply', async (req, res) => {
+router.delete('/reply', async (req, res) => {
     try {
-        await Comment.findByIdAndDelete(req.query.comment)
+        await Comment.findOneAndDelete({_id: req.query.reply, user: req.query.user})
         await Comment.findOneAndUpdate(
             {_id: req.query.parent},
-            {replies: {
-                $pull: req.query.comment
-            }}
+            {$pull: {replies: req.query.reply}}
         )
         res.json({message: 'Reply deleted'})
     } catch (error) {
