@@ -18,12 +18,15 @@ const CommentSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    replies: [
-        {
-            type: String,
-            ref: 'Comment'
-        }
-    ]
+    replies: {
+        type: [
+            {
+                type: String,
+                ref: 'Comment'
+            }
+        ],
+        default: []
+    }
 }, {timestamps: true})
 
 module.exports = mongoose.model('Comment', CommentSchema)

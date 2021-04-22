@@ -7,6 +7,7 @@ const Comment = require('../models/Comment')
 
 // GET: get all comments on a post
 router.get('/parent/:parentID', async (req, res) => {
+    console.log('did hit route')
     try {
         const comments = await Comment.find({parent: req.params.parentID})
         .lean()
