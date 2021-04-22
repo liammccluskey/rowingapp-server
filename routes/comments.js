@@ -1,4 +1,5 @@
 const express = require('express')
+const { populate } = require('../models/Comment')
 const router = express.Router()
 const Comment = require('../models/Comment')
 
@@ -11,6 +12,14 @@ router.get('/parent/:parentID', async (req, res) => {
         .lean()
         .sort('createdAt')
         .populate('user', 'displayName iconURL')
+        .populate({
+            path: 'replies',
+            options: { sort: { createdAt: 1} },
+            populate: {
+                path: 'user',
+                select: 'displayName iconURL'
+            }
+        })
 
         res.json(comments)
     } catch (error) {
