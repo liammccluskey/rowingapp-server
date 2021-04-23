@@ -53,7 +53,7 @@ router.get('/user/:userID/followees', async (req, res) => {
 // GET: check if a user follows another user
 router.get('/doesfollow', async (req, res) => {
     try {
-        const count = await Follow.countDocuments({followee: req.query.follower, followee: req.query.followee})
+        const count = await Follow.countDocuments({followee: req.query.followee, follower: req.query.follower})
         res.json({
             doesFollow: count > 0 
         })
