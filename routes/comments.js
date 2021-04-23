@@ -81,7 +81,15 @@ router.post('/', async (req, res) => {
 // DELETE: delete a comment
 router.delete('/', async (req, res) => {
     try {
-        await Comment.deleteOne({_id: req.query.comment, user: req.query.user})
+        const comment = await Comment.findOne({_id: req.query.comment, user: req.query.user})
+        if (comment.replies.length > 0) {
+            comment.user = null
+            comment.message = ''
+            await comment.save()
+        } else {
+            await Comment.deleteOne({_id: req.query.comment, user: req.query.user})
+        }
+        
         res.json({message: 'Comment deleted'})
     } catch (error) {
         res.status(500).json({message: error})
