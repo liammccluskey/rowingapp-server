@@ -21,9 +21,20 @@ const UserSchema = mongoose.Schema({
         required: false,
         default: null
     },
-    usesDarkMode: {
-        type: Boolean,
-        default: false
+    colorTheme: {
+        /*
+            - 0 : light mode
+            - 1 : dark mode
+        */
+        type: Number,
+        default: 0  
+    },
+    tintColor: {
+        /*
+            0 - 3 (diff colors)
+        */
+       type: Number,
+       default: 0
     }
 }, {timestamps: true})
 

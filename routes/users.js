@@ -347,12 +347,12 @@ router.post('/', async (req, res) =>{
     }
 })
 
-// PATCH: update user color pref
-router.patch('/:userID/color-theme', async (req, res) => {
+// PATCH: update user color theme
+router.patch('/:userID/colorTheme', async (req, res) => {
     try {
         await User.findByIdAndUpdate(req.params.userID, {
             $set: {
-                usesDarkMode: req.body.usesDarkMode
+                colorTheme: req.body.colorTheme
             }
         })
         res.json({message: 'Changes saved'})
@@ -360,6 +360,20 @@ router.patch('/:userID/color-theme', async (req, res) => {
         res.status(500).json({message: error})
     }
 })
+
+// PATCH: udpate user tint color
+router.patch('/:userID/tintColor', async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.params.userID, {
+            $set: {
+                tintColor: req.body.tintColor
+            }
+        })
+        res.json({message: 'Changes saved'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+}
 
 // PATCH: Profile updates
 router.patch('/:userID/iconURL', async (req, res) => {
