@@ -373,7 +373,7 @@ router.patch('/:userID/tintColor', async (req, res) => {
     } catch (error) {
         res.status(500).json({message: error})
     }
-}
+})
 
 // PATCH: Profile updates
 router.patch('/:userID/iconURL', async (req, res) => {
