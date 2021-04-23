@@ -26,6 +26,10 @@ const CommentSchema = mongoose.Schema({
             }
         ],
         default: []
+    },
+    removed: {
+        type: Boolean,
+        default: false
     }
 }, {timestamps: true})
 

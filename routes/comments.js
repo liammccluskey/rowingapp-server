@@ -83,8 +83,7 @@ router.delete('/', async (req, res) => {
     try {
         const comment = await Comment.findOne({_id: req.query.comment, user: req.query.user})
         if (comment.replies.length > 0) {
-            comment.user = null
-            comment.message = ''
+            comment.removed = true
             await comment.save()
         } else {
             await Comment.deleteOne({_id: req.query.comment, user: req.query.user})
@@ -92,6 +91,7 @@ router.delete('/', async (req, res) => {
         
         res.json({message: 'Comment deleted'})
     } catch (error) {
+        console.log(error)
         res.status(500).json({message: error})
     }
 })
