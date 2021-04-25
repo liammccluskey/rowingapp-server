@@ -17,7 +17,7 @@ router.get('/user/:userID', async (req, res) => {
 
         res.json(memberships.map(membership => membership.club))
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
@@ -34,7 +34,7 @@ router.get('/club/:clubID', async (req, res) => {
         .populate('user', 'displayName iconURL uid')
         res.json(memberships.map(membership => ( {...membership.user, role: membership.role} ) ))
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
@@ -51,7 +51,7 @@ router.get('/ismember', async (req, res) => {
             role: membership ? membership.role : -1
         })
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
@@ -62,7 +62,7 @@ router.get('/ismember', async (req, res) => {
         - toUser: _id
         - club: _id
 */
-router.patch('/transferownership', async (req, res) => {
+router.patch('/transferOwnership', async (req, res) => {
     try {
         const requestingUser = await ClubMembership.findOne(
             {club: req.body.club, user: req.body.fromUser}
@@ -80,7 +80,7 @@ router.patch('/transferownership', async (req, res) => {
         )
         res.json({message: 'Successfully transferred club ownership'})
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
@@ -104,7 +104,7 @@ router.patch('/makeAdmin', async (req, res) => {
         )
         res.json({message: 'Successfully added club admin'})
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
@@ -126,13 +126,36 @@ router.patch('/revokeAdmin', async (req, res) => {
         )
         res.json({message: 'Successfully revoked admin'})
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
+    }
+})
+
+// PATCH: Approve a member's join request
+router.patch('/makeMember', async (req, res) => {
+    try {
+        const requestingUser = await ClubMembership.findOne(
+            {club: req.body.club, user: req.body.requestingUser}
+        ).lean()
+        const user = await ClubMembership.findOne(
+            {club: req.body.club, user: req.body.user}
+        ).lean()
+        if (requestingUser.role < 1 || user.role === 2) {
+            throw new Error('You do not have permission to perform this action')
+        }
+        await ClubMembership.findOneAndUpdate(
+            {club: req.body.club, user: req.body.user},
+            {$set: {role: 0}}
+        )
+        res.json({message: 'Successfully approved request to join'})
+    } catch (error) {
+        res.status(500).json({message: error.message})
     }
 })
 
 // DELETE: delete a member || deny request
-router.delete('/removeMember', async (req, res) => {
+router.delete('/revokeMembership', async (req, res) => {
     try {
+        let message
         const requestingUser = await ClubMembership.findOne(
             {club: req.query.club, user: req.query.requestingUser}
         ).lean()
@@ -143,11 +166,16 @@ router.delete('/removeMember', async (req, res) => {
             throw new Error('You do not have permission to perform this action')
         } else if (user.role === 2) {
             throw new Error('The club owner cannot be removed from the club')
+        } else if (user.role === -1) {
+            message = 'Successfully denied request to join'
+        } else {
+            message = 'Successfully removed club member'
         }
+
         await ClubMembership.deleteOne({user: req.query.user, club: req.query.club})
-        res.json({message: 'Successfully removed club member'})
+        res.json({message: message})
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
@@ -182,7 +210,7 @@ router.post('/', async (req, res) => {
         res.json({message: message})
     } catch (error) {
         console.log(error)
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
