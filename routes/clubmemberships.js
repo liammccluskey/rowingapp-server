@@ -189,14 +189,21 @@ router.post('/', async (req, res) => {
 // DELETE: leave a club
 router.delete('/leave', async (req, res) => {
     try {
+        let message
         const user = await ClubMembership.findOne(
             {club: req.query.club, user: req.query.user}
         ).lean()
         if (user.role === 2) {
             throw new Error('Club owners must transfer their ownership before leaving a club')
+        } else if (user.role >= 0) {
+            message = 'Successfully left club'
+        } else if (user.role === -1 ) {
+            message = 'Your request to join has been cancelled'
+        } else {
+            message = 'You do not belong to this club'
         }
         await ClubMembership.deleteOne({user: req.query.user, club: req.query.club})
-        res.json({message: 'Successfully left club'})
+        res.json({message: message})
     } catch (error) {
         res.status(500).json({message: error.message})
     }
