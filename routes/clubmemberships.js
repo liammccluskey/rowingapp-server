@@ -3,8 +3,6 @@ const router = express.Router()
 const ClubMembership = require('../models/ClubMembership')
 const Club = require('../models/Club')
 const User = require('../models/User')
-const { deleteOne } = require('../models/Club')
-const { route } = require('./clubs')
 
 // GET : clubs a user belongs to
 /*
@@ -56,16 +54,132 @@ router.get('/ismember', async (req, res) => {
         res.status(500).json({message: error})
     }
 })
+
+// PATCH: transfer club ownership
+/*
+    - req.body
+        - fromUser: _id
+        - toUser: _id
+        - club: _id
+*/
+router.patch('/transferownership', async (req, res) => {
+    try {
+        const requestingUser = await ClubMembership.findOne(
+            {club: req.body.club, user: req.body.fromUser}
+        ).lean()
+        if (requestingUser.role !== 2) {
+            throw new Error('You do not have permission to perform this action')
+        }
+        await ClubMembership.findOneAndUpdate(
+            {club: req.body.club, user: req.body.fromUser},
+            {$set: {role: 1}}
+        )
+        await ClubMembership.findOneAndUpdate(
+            {club: req.body.club, user: req.body.toUser},
+            {role: 2}
+        )
+        res.json({message: 'Successfully transferred club ownership'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+// PATCH: make a member an admin
+router.patch('/makeAdmin', async (req, res) => {
+    try {
+        const requestingUser = await ClubMembership.findOne(
+            {club: req.body.club, user: req.body.requestingUser}
+        ).lean()
+        const user = await ClubMembership.findOne(
+            {club: req.body.club, user: req.body.user}
+        ).lean()
+        if (requestingUser.role < 1) {
+            throw new Error('You do not have permission to perform this action')
+        } else if (user.role === 2) {
+            throw new Error('You cannot demote the club owner to admin')
+        }
+        await ClubMembership.findOneAndUpdate(
+            {club: req.body.club, user: req.body.user},
+            {$set: {role: 1}}
+        )
+        res.json({message: 'Successfully added club admin'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+// PATCH: revoke a member's admin role
+router.patch('/revokeAdmin', async (req, res) => {
+    try {
+        const requestingUser = await ClubMembership.findOne(
+            {club: req.body.club, user: req.body.requestingUser}
+        ).lean()
+        const user = await ClubMembership.findOne(
+            {club: req.body.club, user: req.body.user}
+        ).lean()
+        if (requestingUser.role < 1 || user.role === 2) {
+            throw new Error('You do not have permission to perform this action')
+        }
+        await ClubMembership.findOneAndUpdate(
+            {club: req.body.club, user: req.body.user},
+            {$set: {role: 0}}
+        )
+        res.json({message: 'Successfully revoked admin'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
+// DELETE: delete a member || deny request
+router.delete('/removeMember', async (req, res) => {
+    try {
+        const requestingUser = await ClubMembership.findOne(
+            {club: req.query.club, user: req.query.requestingUser}
+        ).lean()
+        const user = await ClubMembership.findOne(
+            {club: req.query.club, user: req.query.user}
+        ).lean()
+        if (requestingUser.role < 1) {
+            throw new Error('You do not have permission to perform this action')
+        } else if (user.role === 2) {
+            throw new Error('The club owner cannot be removed from the club')
+        }
+        await ClubMembership.deleteOne({user: req.query.user, club: req.query.club})
+        res.json({message: 'Successfully removed club member'})
+    } catch (error) {
+        res.status(500).json({message: error})
+    }
+})
+
 // POST: join a club
 router.post('/', async (req, res) => {
     try {
+        let message = ''
         const membership = new ClubMembership({
             club: req.body.club,
             user: req.body.user,
-            role: req.body.role
+            role: -1
         })
+        const club = await Club.findById(req.body.club)
+        .lean()
+        .select('name isPrivate')
+        const ownersCount = await ClubMembership.countDocuments(
+            {club: req.body.club, role: 2}
+        )
+
+        if (ownersCount === 0) {
+            membership.role = 2
+            message = `Successfully joined ${club.name} as owner`
+        } else if (club.isPrivate) {
+            membership.role = -1
+            message = `Your request to join ${club.name} has been submitted`
+        } else {
+            membership.role = 0
+            message = `Successfully joined ${club.name}`
+        }
+
         await membership.save()
-        res.json({message: 'Did join club'})
+        res.json({message: message})
     } catch (error) {
         console.log(error)
         res.status(500).json({message: error})
@@ -73,10 +187,16 @@ router.post('/', async (req, res) => {
 })
 
 // DELETE: leave a club
-router.delete('/', async (req, res) => {
+router.delete('/leave', async (req, res) => {
     try {
+        const user = await ClubMembership.findOne(
+            {club: req.query.club, user: req.query.user}
+        ).lean()
+        if (user.role === 2) {
+            throw new Error('Club owners must transfer their ownership before leaving a club')
+        }
         await ClubMembership.deleteOne({user: req.query.user, club: req.query.club})
-        res.json({message: 'Did leave club'})
+        res.json({message: 'Successfully left club'})
     } catch (error) {
         res.status(500).json({message: error})
     }

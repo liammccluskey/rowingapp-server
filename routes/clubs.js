@@ -17,28 +17,11 @@ router.get('/isavailable', async (req, res) => {
     }
 })
 
-// GET: clubs a user belongs to
-router.get('/uid/:uid', async (req, res) => {
-    try {
-        const user = await User
-            .findOne({uid: req.params.uid}).lean()
-            .select('clubIDs')
-
-        const clubs = await Club
-            .find(
-                { _id: { $in: user.clubIDs } }
-            )
-        res.json(clubs)
-    } catch(error) {
-        res.status(500).json({message: error})
-    }
-})
-
 
 // GET: search for clubs with query
 /*
     supported fields: name
-    required field: page
+    required field: page, pagesize
 */
 router.get('/search', async (req, res) => {
     const pageSize = Math.min(50, req.query.pagesize)
@@ -105,7 +88,8 @@ router.post('/', async (req, res) => {
         customURL: req.body.customURL,
         description: req.body.description,
         iconURL: req.body.iconURL,
-        bannerURL: req.body.bannerURL
+        bannerURL: req.body.bannerURL,
+        isPrivate: req.body.isPrivate
     })
     try {
         await club.save()

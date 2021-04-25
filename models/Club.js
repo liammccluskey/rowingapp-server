@@ -22,6 +22,11 @@ const ClubSchema = mongoose.Schema({
         type: String,
         required: false,
         default: undefined
+    },
+    isPrivate: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 }, {timestamps: true} )
 
