@@ -198,7 +198,7 @@ router.delete('/leave', async (req, res) => {
         await ClubMembership.deleteOne({user: req.query.user, club: req.query.club})
         res.json({message: 'Successfully left club'})
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
