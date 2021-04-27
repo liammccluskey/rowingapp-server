@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Club = require('../models/Club')
 const User = require('../models/User')
+const ClubMembership = require('../models/ClubMembership')
 
 
 // PATH: /clubs
@@ -96,6 +97,25 @@ router.post('/', async (req, res) => {
         res.json({_id: club._id})
     } catch (error) {
         res.json({message: error})
+    }
+})
+
+// PATCH: update club information
+router.patch('/', async (req, res) => {
+    delete req.body._id
+    delete req.body.customURL
+    try {
+        const membership = await ClubMembership.findOne({club: req.query.club, user: req.query.requestingUser})
+        .lean()
+        if (!membership || membership.role < 1) {
+            throw new Error('You do not have permission to edit this club')
+        }
+        await Club.findByIdAndUpdate(req.query.club,
+            {$set: req.body}
+        )
+        res.json({message: 'Club changes saved'})
+    } catch (error) {
+        res.status(500).json({message: error.message})
     }
 })
 
