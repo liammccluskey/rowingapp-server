@@ -11,6 +11,7 @@ router.get('/uid/:uid', async (req, res) => {
     try {
         const user = await User.findOne({uid: req.params.uid})
         .lean()
+        .populate('trainingPartner', 'displayName iconURL')
         res.json(user)
     } catch (error) {
         console.log(error)
@@ -412,6 +413,19 @@ router.patch('/:userID/bannerURL', async (req, res) => {
         res.json({message: 'Changes saved'})
     } catch (error) {
         res.status(500).json({message: error})
+    }
+})
+
+router.patch('/:userID/trainingPartner', async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.params.userID, {
+            $set: {
+                trainingPartner: req.body.trainingPartner
+            }
+        })
+        res.json({message: 'Updated training partner'})
+    } catch (error) {
+        res.status(500).json({message: error.message})
     }
 })
 
