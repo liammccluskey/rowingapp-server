@@ -49,7 +49,7 @@ router.get('/search', async (req, res) => {
     }
 })
 
-// GET: a user by uid
+// GET: a user by _id
 router.get('/:userID', async (req, res) => {
     try {
         const user = await User.findById(req.params.userID)

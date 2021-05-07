@@ -46,4 +46,20 @@ mongoose.connect(process.env.DB_CONNECTION ,{
         console.log('Connected to DB')
 })
 
-app.listen(process.env.PORT || 3000)
+const server = app.listen(process.env.PORT || 3000)
+
+
+// socketio
+const socketIO = require('socket.io')
+const io = socketIO(server)
+
+io.on('connection', socket => {
+    socket.on('join_room', data => {
+        socket.join(data.room)
+        io.to(data.room).emit('join_room', {name: data.name})
+    })
+
+    socket.on('send_message', data => {
+        io.to(data.room).emit('receive_message', data)
+    })
+})
