@@ -56,9 +56,17 @@ app.set('socketio', io)
 
 const rooms = {}
 function joinRoom(room, user, socket) {
+    const data = {...user, socketID: socket.id}
+    if (rooms.hasOwnProperty(room)) {
+        rooms[room].push(data)
+    } else {
+        rooms[room] = [data]
+    }
 }
-function leaveRoom(room) {
-
+function leaveRoom(room, socket) {
+    if ( rooms.hasOwnProperty(room) && rooms[room].length > 1 ) {
+        rooms[room] = rooms[room].filter(u => u.socketID !== socket.id)
+    }
 }
 
 io.on('connection', socket => {
@@ -66,11 +74,20 @@ io.on('connection', socket => {
         socket.join(data.room)
         io.to(data.room).emit('join_room', {...data.user})
 
-        socket.emit('rooms', io.rooms)
+        joinRoom(data.room, data.user, socket)
+        io.to(data.room).emit('udpate_room_members', rooms[room])
     })
 
     socket.on('send_message', data => {
         socket.join(data.room)
         io.to(data.room).emit('receive_message', data)
+    })
+
+    socket.on('disconnect', reason => {
+        Object.keys(socket.rooms).forEach(room => {
+            leaveRoom(room)
+            io.to(room).emit('update_room_members', rooms[room])
+        })
+
     })
 })
