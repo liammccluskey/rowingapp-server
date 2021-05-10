@@ -54,10 +54,19 @@ const socketIO = require('socket.io')
 const io = socketIO(server)
 app.set('socketio', io)
 
+const rooms = {}
+function joinRoom(room, user, socket) {
+}
+function leaveRoom(room) {
+
+}
+
 io.on('connection', socket => {
     socket.on('join_room', async data => {
         socket.join(data.room)
         io.to(data.room).emit('join_room', {...data.user})
+
+        socket.emit('rooms', io.rooms)
     })
 
     socket.on('send_message', data => {
