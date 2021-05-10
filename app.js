@@ -55,9 +55,10 @@ const io = socketIO(server)
 app.set('socketio', io)
 
 io.on('connection', socket => {
-    socket.on('join_room', data => {
-        socket.join(data.room)
+    socket.on('join_room', async data => {
+        await socket.join(data.room)
         io.to(data.room).emit('join_room', {...data.user})
+        socket.emit('join_room', {...data.user})
     })
 
     socket.on('send_message', data => {
