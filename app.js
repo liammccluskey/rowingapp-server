@@ -52,11 +52,12 @@ const server = app.listen(process.env.PORT || 3000)
 // socketio
 const socketIO = require('socket.io')
 const io = socketIO(server)
+app.set('socketio', io)
 
 io.on('connection', socket => {
     socket.on('join_room', data => {
         socket.join(data.room)
-        io.to(data.room).emit('join_room', {name: data.name})
+        io.to(data.room).emit('join_room', {user: data.user})
     })
 
     socket.on('send_message', data => {
