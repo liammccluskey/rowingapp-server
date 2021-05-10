@@ -72,10 +72,11 @@ function leaveRoom(room, socket) {
 io.on('connection', socket => {
     socket.on('join_room', async data => {
         socket.join(data.room)
-        io.to(data.room).emit('join_room', {...data.user})
 
         joinRoom(data.room, data.user, socket)
         io.to(data.room).emit('update_room_members', rooms[room])
+
+        socket.emit('update_room_members', rooms[room])
     })
 
     socket.on('send_message', data => {
