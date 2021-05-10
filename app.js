@@ -57,7 +57,7 @@ app.set('socketio', io)
 io.on('connection', socket => {
     socket.on('join_room', data => {
         socket.join(data.room)
-        io.to(data.room).emit('join_room', {user: data.user})
+        io.to(data.room).emit('join_room', {...data.user})
     })
 
     socket.on('send_message', data => {
