@@ -54,14 +54,8 @@ const socketIO = require('socket.io')
 const io = socketIO(server)
 app.set('socketio', io)
 
-/*
-    rooms shape:
-        rooms: { roomID: {
-            socketID: { ...user }   // dN, iU, _id
-        }}
-*/
-const rooms = {}
 
+const rooms = {}
 function joinRoom(room, user, socket) {
     if (! rooms.hasOwnProperty(room)) {
         rooms[room] = []
@@ -83,7 +77,7 @@ io.on('connection', socket => {
         socket.join(data.room)
 
         joinRoom(data.room, data.user, socket) 
-        io.to(data.room).emit('update_room_members', Object.values(rooms[data.room]) )
+        io.to(data.room).emit('update_room_members', rooms[room] )
     })
 
     socket.on('send_message', data => {
@@ -94,7 +88,7 @@ io.on('connection', socket => {
         for (const room of socket.rooms) {
             if (room !== socket.id) {
                 leaveRoom(room, socket)
-                io.to(room).emit('update_room_members', Object.values(rooms[data.room]) )
+                socket.broadcast.to(room).emit('update_room_members', rooms[room] )
             }
         }
     })
