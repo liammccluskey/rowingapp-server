@@ -91,7 +91,7 @@ io.on('connection', socket => {
     })
 
     socket.on('disconnecting', reason => {
-        Object.keys(socket.rooms).forEach(room => {
+        socket.rooms.forEach(room => {
             leaveRoom(room, socket)
             io.to(room).emit('update_room_members', Object.values(rooms[data.room]) )
         })
