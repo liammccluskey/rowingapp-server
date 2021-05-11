@@ -92,7 +92,7 @@ router.get('/:sessionID', async (req,res) => {
     try {
         const session = await Session.findById(req.params.sessionID)
         .lean()
-        .populate('club', 'name iconURL')
+        .populate('club', 'name iconURL customURL')
         .populate('hostUser', 'displayName iconURL')
         .populate('members', 'displayName iconURL')
         res.json(session)
