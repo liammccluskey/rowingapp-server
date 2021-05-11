@@ -64,14 +64,14 @@ const rooms = {}
 
 function joinRoom(room, user, socket) {
     if (! rooms.hasOwnProperty(room)) {
-        rooms[room] = {}
+        rooms[room] = []
     }
-    rooms[room][socket.id] = user
+    rooms[room].push({...user, socketID: socket.id})
 }
 function leaveRoom(room, socket) {
     if ( rooms.hasOwnProperty(room) ) {
-        if ( Object.keys(rooms[room]) > 1 ) {
-            delete rooms[room][socket.id]
+        if ( rooms[room].length > 1 ) {
+            rooms[room] = rooms[room].filter(u => u.socketID !== socket.id)
         } else {
             delete rooms[room]
         }
@@ -91,9 +91,11 @@ io.on('connection', socket => {
     })
 
     socket.on('disconnecting', reason => {
-        socket.rooms.forEach(room => {
-            leaveRoom(room, socket)
-            io.to(room).emit('update_room_members', Object.values(rooms[data.room]) )
-        })
+        for (const room of socket.rooms) {
+            if (room !== socket.id) {
+                leaveRoom(room, socket)
+                io.to(room).emit('update_room_members', Object.values(rooms[data.room]) )
+            }
+        }
     })
 })
