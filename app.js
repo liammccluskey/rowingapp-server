@@ -53,7 +53,7 @@ const server = app.listen(process.env.PORT || 3000)
 const socketIO = require('socket.io')
 const io = socketIO(server)
 app.set('socketio', io)
-
+/*
 const rooms = {}
 function joinRoom(room, user, socket) {
     const data = {...user, socketID: socket.id}
@@ -68,15 +68,15 @@ function leaveRoom(room, socket) {
         rooms[room] = rooms[room].filter(u => u.socketID !== socket.id)
     }
 }
-
+*/
 io.on('connection', socket => {
     socket.on('join_room', data => {
         socket.join(data.room)
 
         joinRoom(data.room, data.user, socket)
-        io.to(data.room).emit('update_room_members', rooms[room])
+        io.to(data.room).emit('update_room_members', data.user)
 
-        socket.emit('update_room_members', [data.user])
+        //socket.emit('update_room_members', [data.user])
     })
 
     socket.on('send_message', data => {
@@ -87,7 +87,7 @@ io.on('connection', socket => {
     socket.on('disconnect', reason => {
         Object.keys(socket.rooms).forEach(room => {
             leaveRoom(room)
-            io.to(room).emit('update_room_members', rooms[room])
+            io.to(room).emit('update_room_members', data.user)
         })
 
     })
