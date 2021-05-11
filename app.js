@@ -88,7 +88,7 @@ io.on('connection', socket => {
         for (const room of socket.rooms) {
             if (room !== socket.id) {
                 leaveRoom(room, socket)
-                socket.broadcast.to(room).emit('update_room_members', rooms[data.room] )
+                socket.broadcast.to(room).emit('update_room_members', rooms[room] )
             }
         }
     })
