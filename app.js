@@ -77,7 +77,7 @@ io.on('connection', socket => {
         socket.join(data.room)
 
         joinRoom(data.room, data.user, socket) 
-        io.to(data.room).emit('update_room_members', rooms[room] )
+        io.to(data.room).emit('update_room_members', rooms[data.room] )
     })
 
     socket.on('send_message', data => {
@@ -88,7 +88,7 @@ io.on('connection', socket => {
         for (const room of socket.rooms) {
             if (room !== socket.id) {
                 leaveRoom(room, socket)
-                socket.broadcast.to(room).emit('update_room_members', rooms[room] )
+                socket.broadcast.to(room).emit('update_room_members', rooms[data.room] )
             }
         }
     })
