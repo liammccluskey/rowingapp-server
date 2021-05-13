@@ -59,16 +59,8 @@ function joinRoom(room, user, socket) {
     if (! rooms.hasOwnProperty(room)) {
         rooms[room] = []
     }
-    let userInRoom = false
-    for (let i = 0; i < rooms[room].length; i++) {
-        if (rooms[room][i]._id === user._id) {
-            userInRoom = true
-            break
-        }
-    }
-    if (! userInRoom) {
-        rooms[room].push({...user, socketID: socket.id})
-    }
+    rooms[room] = rooms[room].filter(u => u._id !== user._id)
+    rooms[room].push({...user, socketID: socket.id})
 }
 function leaveRoom(room, socket) {
     if ( rooms.hasOwnProperty(room) ) {
