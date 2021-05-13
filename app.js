@@ -59,7 +59,7 @@ function joinRoom(room, user, socket) {
     if (! rooms.hasOwnProperty(room)) {
         rooms[room] = []
     }
-    const userInRoom = false
+    let userInRoom = false
     for (let i = 0; i < rooms[room].length; i++) {
         if (rooms[room][i]._id === user._id) {
             userInRoom = true
