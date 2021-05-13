@@ -65,7 +65,7 @@ function joinRoom(room, user, socket) {
 function leaveRoom(room, socket) {
     if ( rooms.hasOwnProperty(room) ) {
         if ( rooms[room].length > 1 ) {
-            rooms[room] = rooms[room].filter(u => u.socketID !== socket.id)
+            rooms[room] = rooms[room].filter(u => u.socketID !== socket.id && u._id !== user._id)
         } else {
             delete rooms[room]
         }
