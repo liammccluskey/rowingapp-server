@@ -78,7 +78,7 @@ io.on('connection', socket => {
 
         joinRoom(data.room, data.user, socket) 
         io.to(data.room).emit('update_room_members', rooms[data.room] )
-    })
+    }) 
 
     socket.on('send_message', data => {
         io.to(data.room).emit('receive_message', data)
