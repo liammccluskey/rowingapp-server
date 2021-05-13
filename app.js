@@ -54,13 +54,21 @@ const socketIO = require('socket.io')
 const io = socketIO(server)
 app.set('socketio', io)
 
-
 const rooms = {}
 function joinRoom(room, user, socket) {
     if (! rooms.hasOwnProperty(room)) {
         rooms[room] = []
     }
-    rooms[room].push({...user, socketID: socket.id})
+    const userInRoom = false
+    for (let i = 0; i < rooms[room].length; i++) {
+        if (rooms[room][i]._id === user._id) {
+            userInRoom = true
+            break
+        }
+    }
+    if (! userInRoom) {
+        rooms[room].push({...user, socketID: socket.id})
+    }
 }
 function leaveRoom(room, socket) {
     if ( rooms.hasOwnProperty(room) ) {
@@ -82,6 +90,11 @@ io.on('connection', socket => {
 
     socket.on('send_message', data => {
         io.to(data.room).emit('receive_message', data)
+    })
+
+    socket.on('send_direct_message', data => {
+        const room = [data.sender._id, data.recipient._id].sort().join('')
+        io.to(room).emit('receive_message', data)
     })
 
     socket.on('disconnecting', reason => {

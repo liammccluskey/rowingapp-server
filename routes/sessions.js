@@ -101,8 +101,6 @@ router.get('/:sessionID', async (req,res) => {
     }
 })
 
-
-
 // GET: activites data from session
 /*
     USE CASE: full display of session members' activity (all member activity)
