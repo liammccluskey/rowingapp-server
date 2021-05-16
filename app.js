@@ -84,11 +84,6 @@ io.on('connection', socket => {
         io.to(data.room).emit('receive_message', data)
     })
 
-    socket.on('send_direct_message', data => {
-        const room = [data.sender._id, data.recipient._id].sort().join('')
-        io.to(room).emit('receive_message', data)
-    })
-
     socket.on('disconnecting', reason => {
         for (const room of socket.rooms) {
             if (room !== socket.id) {
