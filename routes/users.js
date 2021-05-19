@@ -330,6 +330,47 @@ router.get('/:userID/statistics-progress', async (req, res) => {
 
 })
 
+// GET: heatmap data for profile
+/*
+    req.query
+        - currentYear
+        - yearOffset 
+*/
+router.get('/:userID/activity-heatmap', async (req, res) => {
+    const yearStart = moment().set({'year': req.query.currentYear - req.query.yearOffset}).startOf('year')
+    const yearEnd = yearStart.clone().endOf('year')
+    const daysInYear = yearStart.isLeapYear() ? 366 : 365
+
+    try {
+        const activities = await Activity.find({
+            user: req.params.userID,
+            createdAt: {$gte: yearStart.toDate(), $lte: yearEnd.toDate()},
+        })
+        const mapData = {}
+        let max = 0
+
+        activities.forEach(ac => {
+            const day = moment(ac.createdAt).dayOfYear()
+
+            if (mapData.hasOwnProperty(day)) {
+                mapData[day] += 1
+            } else {
+                mapData[day] = 1
+            }
+            max = Math.max(mapData[day], max)
+        })
+
+        res.json({
+            count: activities.length,
+            max: max,
+            data: mapData
+        })
+
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
 
 // POST: create a new user
 router.post('/', async (req, res) =>{
