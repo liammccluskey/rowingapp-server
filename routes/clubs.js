@@ -3,6 +3,7 @@ const router = express.Router()
 const Club = require('../models/Club')
 const User = require('../models/User')
 const ClubMembership = require('../models/ClubMembership')
+const Session = require('../models/Session')
 
 
 // PATH: /clubs
@@ -48,6 +49,41 @@ router.get('/search', async (req, res) => {
     } catch (error) {
         console.log(error)
         res.status(500).json({message: error})
+    }
+})
+
+// GET: club heatmap session data
+router.get('/:clubID/session-heatmap', async (req, res) => {
+    const yearStart = moment().set({'year': req.query.currentYear - req.query.yearOffset}).startOf('year')
+    const yearEnd = yearStart.clone().endOf('year')
+
+    try {
+        const sessions = await Session.find({
+            club: req.params.clubID,
+            createdAt: {$gte: yearStart.toDate(), $lte: yearEnd.toDate()},
+        })
+        const mapData = {}
+        let max = 0
+
+        sessions.forEach(ac => {
+            const day = moment(ac.createdAt).dayOfYear()
+
+            if (mapData.hasOwnProperty(day)) {
+                mapData[day] += 1
+            } else {
+                mapData[day] = 1
+            }
+            max = Math.max(mapData[day], max)
+        })
+
+        res.json({
+            count: activities.length,
+            max: max,
+            data: mapData
+        })
+
+    } catch (error) {
+        res.status(500).json({message: error.message})
     }
 })
 
