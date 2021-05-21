@@ -4,6 +4,7 @@ const Club = require('../models/Club')
 const User = require('../models/User')
 const ClubMembership = require('../models/ClubMembership')
 const Session = require('../models/Session')
+const moment = require('moment')
 
 
 // PATH: /clubs
@@ -60,13 +61,13 @@ router.get('/:clubID/session-heatmap', async (req, res) => {
     try {
         const sessions = await Session.find({
             club: req.params.clubID,
-            createdAt: {$gte: yearStart.toDate(), $lte: yearEnd.toDate()},
+            startAt: {$gte: yearStart.toDate(), $lte: yearEnd.toDate()},
         })
         const mapData = {}
         let max = 0
 
-        sessions.forEach(ac => {
-            const day = moment(ac.createdAt).dayOfYear()
+        sessions.forEach(s => {
+            const day = moment(s.startAt).dayOfYear()
 
             if (mapData.hasOwnProperty(day)) {
                 mapData[day] += 1
@@ -77,7 +78,7 @@ router.get('/:clubID/session-heatmap', async (req, res) => {
         })
 
         res.json({
-            count: activities.length,
+            count: sessions.length,
             max: max,
             data: mapData
         })
