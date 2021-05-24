@@ -38,6 +38,9 @@ app.use('/comments', commentsRoute)
 const likesRoute = require('./routes/likes')
 app.use('/likes', likesRoute)
 
+const feedRoute = require('./routes/feed')
+app.use('/feed', feedRoute)
+
 mongoose.connect(process.env.DB_CONNECTION ,{ 
     useNewUrlParser: true, 
     useUnifiedTopology: true,

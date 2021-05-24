@@ -5,7 +5,6 @@ const User = require('../models/User')
 const ClubMembership = require('../models/ClubMembership')
 const Activity = require('../models/Activity')
 const Club = require('../models/Club')
-const { route } = require('./users')
 const moment = require('moment')
 
 // PATH: /sessions
