@@ -10,7 +10,10 @@ const User = require('../models/User')
 */
 router.get('/user/:userID', async (req, res) => {
     try {
-        const memberships = await ClubMembership.find({user: req.params.userID})
+        const memberships = await ClubMembership.find({
+            user: req.params.userID,
+            role: {$gte: 0}
+        })
         .lean()
         .select('club')
         .populate('club', 'name iconURL customURL')

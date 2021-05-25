@@ -64,28 +64,6 @@ router.get('/user/:userID', async (req, res) => {
 
 })
 
-// GET: sessions for club feed
-router.get('/feed/club/:clubID', async (req, res) => {
-    const endTime = moment()
-    const startTime = endTime.clone().subtract(1, 'month')
-    try {
-        const sessions = await Session.find({
-            club: req.params.clubID,
-            startAt: {$gte: startTime.toDate(), $lte: endTime.toDate()}
-        })
-        .lean()
-        .sort('-startAt')
-        .select('-members')
-        .limit(30)
-        .populate('club', 'name iconURL')
-
-        res.json(sessions)
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({message: error})
-    }
-})
-
 // GET: specific session
 router.get('/:sessionID', async (req,res) => {
     try {
