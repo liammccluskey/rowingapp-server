@@ -21,7 +21,7 @@ const UserSchema = mongoose.Schema({
         required: false,
         default: null
     },
-    colorTheme: {
+    colorTheme: { // legacy
         /*
             - 0 : light mode
             - 1 : dark mode
@@ -32,6 +32,15 @@ const UserSchema = mongoose.Schema({
     tintColor: {
         /*
             0 - 3 (diff colors)
+        */
+       type: Number,
+       default: 0
+    },
+    themeColor: {
+        /*
+            0 - light mode,
+            1 - dark mode,
+            2 - blues mode,
         */
        type: Number,
        default: 0

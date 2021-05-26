@@ -403,6 +403,19 @@ router.patch('/:userID/colorTheme', async (req, res) => {
     }
 })
 
+// PATCH: update user theme color
+router.patch('/:userID/themeColor', async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.params.userID, {
+            $set: {
+                themeColor: req.body.themeColor
+            }
+        })
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
 // PATCH: udpate user tint color
 router.patch('/:userID/tintColor', async (req, res) => {
     try {
@@ -413,7 +426,7 @@ router.patch('/:userID/tintColor', async (req, res) => {
         })
         res.json({message: 'Changes saved'})
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
