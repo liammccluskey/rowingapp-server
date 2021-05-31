@@ -411,6 +411,7 @@ router.patch('/:userID/themeColor', async (req, res) => {
                 themeColor: req.body.themeColor
             }
         })
+        res.json({message: 'Changes saved'})
     } catch (error) {
         res.status(500).json({message: error.message})
     }
