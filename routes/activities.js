@@ -63,8 +63,8 @@ router.post('/', async (req,res) => {
         session: req.body.session
     })
     try {
-        await activity.save()
-        res.json({message: 'Did create activity'})
+        const ac = await activity.save()
+        res.json(ac)
     } catch(error) {
         res.status(500).json({message: error})
     }
