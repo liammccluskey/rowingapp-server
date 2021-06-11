@@ -89,17 +89,17 @@ router.get('/:userID/statistics', async (req, res) => {
 
         weekActivities.forEach(ac => {
             const dayID = moment(ac.createdAt).day()            // 0 indexed
-            week[dayID] += ac.distance
+            week[dayID] += Math.round(ac.distance)
             aggregate.weekMeters += ac.distance
         })
         monthActivities.forEach(ac => {
             const dayID = moment(ac.createdAt).date() - 1       // 1 indexed
-            month[dayID] += ac.distance
+            month[dayID] += Math.round(ac.distance)
             aggregate.monthMeters += ac.distance
         })
         yearActivities.forEach( ac => {
-            const monthID = moment(ac.createAt).month()         // 0 indexed
-            year[monthID] += ac.distance
+            const monthID = moment(ac.createdAt).month()         // 0 indexed
+            year[monthID] += Math.round(ac.distance)
             aggregate.yearMeters += ac.distance
         })
 
@@ -112,7 +112,7 @@ router.get('/:userID/statistics', async (req, res) => {
             }
         })    
     } catch (error) {
-        res.status(500).json({message: error})
+        res.status(500).json({message: error.message})
     }
 })
 
