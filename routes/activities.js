@@ -24,7 +24,6 @@ router.get('/search', async (req, res) => {
     )
 
     try {
-
         const activitiesCount = await Activity.countDocuments(filterQuery)
         const activities = await Activity.find(filterQuery)
         .sort(req.query.sortby)
